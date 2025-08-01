@@ -53,31 +53,48 @@
       handleMultipleFiles(fileInput.files);
     });
 
-    async function handleMultipleFiles(fileList) {
-      const senderName = senderInput.value.trim();
-      if (!senderName) return alert("Please enter your name");
+    function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
 
-      const formData = new FormData();
-      formData.append('senderName', senderName);
-      for (const file of fileList) formData.append('files', file);
+  async function handleMultipleFiles(fileList) {
+    const senderName = senderInput.value.trim();
+    if (!senderName) return alert("Please enter your name");
 
-      const res = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
+    const formData = new FormData();
+    formData.append('senderName', senderName);
+    for (const file of fileList) formData.append('files', file);
 
-      const data = await res.json();
-      latestKey = data.key;
-      document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
+    const res = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
 
-      const tableHtml = `
-        <table>
-          <thead><tr><th>File Name</th><th>Key</th></tr></thead>
-          <tbody>
-            ${data.files.map(f => `<tr><td>${f.originalName}</td><td>${data.key}</td></tr>`).join('')}
-          </tbody>
-        </table>
-      `;
+    const data = await res.json();
+    latestKey = data.key;
+    document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
+
+    const totalSize = data.files.reduce((sum, f) => sum + f.size, 0);
+    const totalFiles = data.files.length;
+
+    const tableHtml = `
+      <table>
+        <thead>
+          <tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr>
+          <tr><th>File Name</th><th>Size</th></tr>
+        </thead>
+        <tbody>
+          ${data.files.map(f => `
+            <tr>
+              <td>${f.originalName}</td>
+              <td>${formatSize(f.size)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
       document.getElementById('fileTableContainer').innerHTML = tableHtml;
 
       fetchPendingReceivers(); // Start polling after upload

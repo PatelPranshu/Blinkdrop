@@ -57,7 +57,8 @@ app.post('/upload', upload.array('files', 10), (req, res) => {
   const key = generateUniqueKey();
   const files = req.files.map(file => ({
     filename: file.filename,
-    originalName: file.originalname
+    originalName: file.originalname,
+    size: file.size
   }));
 
   activeTransfers[key] = {
@@ -88,7 +89,8 @@ app.post('/file-info/:key', (req, res) => {
     receiverName,
     files: transfer.files.map((file, i) => ({
       name: file.originalName,
-      index: i
+      index: i,
+      size: file.size
     })),
     approved: transfer.approvedReceivers.includes(receiverName)
   });
@@ -176,7 +178,22 @@ app.get('/admin/sessions', (req, res) => {
 
   res.json(sessions);
 });
+// -------------------- Delete All Uploads by Admin --------------------
+app.post('/admin/delete-all-uploads', (req, res) => {
+  const uploadsPath = path.join(__dirname, 'uploads');
 
+  fs.readdir(uploadsPath, (err, files) => {
+    if (err) return res.status(500).send('Error reading uploads folder');
+
+    for (const file of files) {
+      fs.unlink(path.join(uploadsPath, file), err => {
+        if (err) console.error('Error deleting file:', file);
+      });
+    }
+    console.log('🗑️ All uploads deleted by admin');
+    res.sendStatus(200);
+  });
+});
 // -------------------- Start Server --------------------
 // server.listen(PORT, () => {
 //   console.log(`🚀 Server running at http://localhost:${PORT}`);

@@ -81,17 +81,19 @@
             <tbody>
               ${data.files.map(f => `
                 <tr>
-                  <td>${f.name}</td>
+                  <td>${f.name} <br><small>${formatSize(f.size)}</small></td>
                   <td>
                     ${data.approved
                       ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank"><button>Download</button></a>`
                       : `<span style="color:gray;">Waiting for approval...</span>`}
                   </td>
                 </tr>`).join('')}
+
             </tbody>
           </table>
         `;
-
+          const totalSize = data.files.reduce((sum, f) => sum + f.size, 0);
+          html += `<p><strong>Total Size:</strong> ${formatSize(totalSize)}</p>`;
         container.innerHTML = html;
       } else {
         container.innerHTML = '<p style="color:red;">Invalid key or server error.</p>';
@@ -111,6 +113,12 @@
         document.body.removeChild(link);
       });
     }
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
   </script>
 </body>
 </html>

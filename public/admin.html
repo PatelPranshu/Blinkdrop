@@ -7,7 +7,6 @@
 </head>
 <body>
   <h2>Admin Login</h2>
-
   <div id="loginForm">
     <input type="text" id="adminUser" placeholder="Username">
     <input type="password" id="adminPass" placeholder="Password">
@@ -46,6 +45,9 @@
       const sessions = await res.json();
 
       const html = `
+      <div style="text-align: right; margin-bottom: 10px;">
+        <button onclick="deleteAllUploads()" style="background-color: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 4px;">Delete All Uploads</button>
+      </div>
         <table>
           <thead>
             <tr>
@@ -77,13 +79,36 @@
                 <td>${(s.receiversWaiting || []).join(', ') || '-'}</td>
                 <td>${(s.approvedReceivers || []).join(', ') || '-'}</td>
                 <td>${(s.totalSize / 1024).toFixed(2)} KB</td>
-                <td>${new Date(s.createdAt).toLocaleTimeString()}</td>
+                <td>${new Date(s.createdAt).toLocaleString('en-IN', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })}</td>
+
               </tr>
             `).join('')}
           </tbody>
         </table>
       `;
       document.getElementById('sessionTable').innerHTML = html;
+    }
+
+    async function deleteAllUploads() {
+      if (!confirm("Are you sure you want to delete all uploaded files?")) return;
+
+      const res = await fetch('/admin/delete-all-uploads', {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        alert("All uploads deleted.");
+        loadSessions(); // Refresh table
+      } else {
+        alert("Error deleting uploads.");
+      }
     }
   </script>
 </body>
