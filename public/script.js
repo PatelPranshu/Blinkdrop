@@ -52,3 +52,13 @@ async function handleMultipleFiles(fileList) {
   `;
   document.getElementById('fileTableContainer').innerHTML = tableHtml;
 }
+
+
+const clearBtn = document.getElementById('clearBtn');
+if (clearBtn) {
+  clearBtn.addEventListener('click', () => {
+    document.getElementById('keyInfo').innerHTML = '';
+    document.getElementById('fileTableContainer').innerHTML = '';
+    fileInput.value = null;
+  });
+}

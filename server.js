@@ -4,11 +4,11 @@ const http = require('http');
 const socketIo = require('socket.io');
 const fs = require('fs');
 const path = require('path');
-
+require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-const PORT = 3000;
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(express.static('public'));

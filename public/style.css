@@ -7,3 +7,17 @@ input, button {
   padding: 0.5rem;
   margin: 0.5rem;
 }
+#fileInput{
+    display: none;
+}
+#clearBtn{
+    padding: 0.6rem 1.2rem;
+    background-color: crimson;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#clearBtn:hover {
+  background-color: darkred;
+}
