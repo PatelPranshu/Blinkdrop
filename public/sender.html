@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="icon" type="image/png" href="/favicon.png">
   <title>Send Files</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -97,7 +99,7 @@
     `;
       document.getElementById('fileTableContainer').innerHTML = tableHtml;
 
-      fetchPendingReceivers(); // Start polling after upload
+      fetchPendingReceivers();
     }
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -159,7 +161,7 @@
         body: JSON.stringify({ key, receiverName })
       });
 
-      fetchPendingReceivers(); // refresh UI immediately
+      fetchPendingReceivers(); 
     }
 
     setInterval(fetchPendingReceivers, 3000);
