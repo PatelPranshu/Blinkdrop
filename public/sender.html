@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Send Files</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+      text-align: center;
+    }
+    #drop-zone {
+      border: 3px dashed #007bff;
+      padding: 40px;
+      background-color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    #drop-zone.dragover {
+      background-color: #e0f0ff;
+    }
+    table {
+      margin: 1rem auto;
+      border-collapse: collapse;
+      width: 80%;
+      background: white;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Send Files</h2>
+
+  <div id="drop-zone">Drag & Drop or Click to Select Files</div>
+  <input type="file" id="fileInput" multiple />
+
+  <p id="keyInfo"></p>
+  <div id="fileTableContainer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
