@@ -106,3 +106,6 @@ async function approve(key, receiverName) {
   alert(`Approved ${receiverName}`);
   document.getElementById('pendingRequests').innerHTML = '';
 }
+
+
+

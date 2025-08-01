@@ -79,52 +79,61 @@
         </table>
       `;
       document.getElementById('fileTableContainer').innerHTML = tableHtml;
+
+      fetchPendingReceivers(); // Start polling after upload
     }
 
     document.getElementById('clearBtn').addEventListener('click', () => {
       document.getElementById('keyInfo').innerHTML = '';
       document.getElementById('fileTableContainer').innerHTML = '';
+      document.getElementById('pendingRequests').innerHTML = '';
       fileInput.value = null;
+      latestKey = null;
     });
 
-    // Polling for receiver request
-    setInterval(async () => {
+    async function fetchPendingReceivers() {
       if (!latestKey) return;
 
-      const res = await fetch(`/file-info/${latestKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiverName: 'POLL' })
-      });
+      const res = await fetch('/admin/sessions');
+      const sessions = await res.json();
+      const session = sessions.find(s => s.key === latestKey);
+      if (!session) return;
 
-      if (!res.ok) return;
-      const data = await res.json();
-      const receiver = data.receiverName;
-      const approved = data.approved;
-      const requestBox = document.getElementById('pendingRequests');
+      const pendingList = session.receiversWaiting || [];
+      const approvedList = session.approvedReceivers || [];
 
-      // ✅ Only show if receiverName is valid and not already approved
-      if (
-        receiver &&
-        receiver !== 'POLL' &&
-        receiver !== 'null' &&
-        !approved
-      ) {
-        requestBox.innerHTML = `
-          <table>
-            <thead><tr><th>Receiver</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr>
-                <td>${receiver}</td>
-                <td><button onclick="approve('${latestKey}', '${receiver}')">Approve</button></td>
-              </tr>
-            </tbody>
-          </table>
+      const tableRows = pendingList.map((r, index) => {
+        const isApproved = approvedList.includes(r);
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td><b>${r}</b></td>
+            <td>
+              ${
+                isApproved
+                  ? '<button disabled style="background-color: #4CAF50; color: white;">Approved</button>'
+                  : `<button onclick="approve('${latestKey}', '${r}')">Approve</button>`
+              }
+            </td>
+          </tr>
         `;
-      } else {
-        requestBox.innerHTML = '';
-      }
-    }, 3000);
+      }).join('');
+
+      document.getElementById('pendingRequests').innerHTML = `
+        <table border="1" cellpadding="8" cellspacing="0">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Receiver Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      `;
+    }
 
     async function approve(key, receiverName) {
       await fetch('/approve', {
@@ -132,9 +141,11 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, receiverName })
       });
-      alert(`Approved ${receiverName}`);
-      document.getElementById('pendingRequests').innerHTML = '';
+
+      fetchPendingReceivers(); // refresh UI immediately
     }
+
+    setInterval(fetchPendingReceivers, 3000);
   </script>
 </body>
 </html>

@@ -10,7 +10,7 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
-input[type="text"] {
+input[type="text"], input[type="password"] {
   padding: 0.6rem;
   width: 250px;
   font-size: 1rem;
@@ -72,10 +72,10 @@ th {
   color: white;
 }
 
-a button {
+a button, #downloadAllBtn {
   background-color: green;
 }
 
-a button:hover {
+a button:hover, #downloadAllBtn:hover {
   background-color: darkgreen;
 }

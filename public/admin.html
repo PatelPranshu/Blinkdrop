@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Admin Login</h2>
+
+  <div id="loginForm">
+    <input type="text" id="adminUser" placeholder="Username">
+    <input type="password" id="adminPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" style="color: red;"></p>
+  </div>
+
+  <div id="dashboard" style="display: none;">
+    <h2>Active File Transfers</h2>
+    <div id="sessionTable"></div>
+  </div>
+
+  <script>
+    async function login() {
+      const username = document.getElementById('adminUser').value;
+      const password = document.getElementById('adminPass').value;
+
+      const res = await fetch('/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (res.ok) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadSessions();
+        setInterval(loadSessions, 3000);
+      } else {
+        document.getElementById('loginError').innerText = 'Invalid credentials';
+      }
+    }
+
+    async function loadSessions() {
+      const res = await fetch('/admin/sessions');
+      const sessions = await res.json();
+
+      const html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Sender</th>
+              <th>Files</th>
+              <th>Receiver Waiting</th>
+              <th>Approved Receivers</th>
+              <th>Total Size</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sessions.map(s => `
+              <tr>
+                <td>${s.key}</td>
+                <td>${s.senderName}</td>
+                <td>
+                  <ul>
+                    ${s.fileDetails.map(f => `
+                      <li>${f.name} (${(f.size / 1024).toFixed(2)} KB)
+                        ${f.remainingSeconds !== null
+                          ? `⏳ ${Math.floor(f.remainingSeconds / 60)}m ${f.remainingSeconds % 60}s left`
+                          : ''
+                        }
+                      </li>`).join('')}
+                  </ul>
+                </td>
+                <td>${(s.receiversWaiting || []).join(', ') || '-'}</td>
+                <td>${(s.approvedReceivers || []).join(', ') || '-'}</td>
+                <td>${(s.totalSize / 1024).toFixed(2)} KB</td>
+                <td>${new Date(s.createdAt).toLocaleTimeString()}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('sessionTable').innerHTML = html;
+    }
+  </script>
+</body>
+</html>

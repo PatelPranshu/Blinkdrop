@@ -9,7 +9,7 @@
   <h2>Receive Files</h2>
 
   <input type="text" id="receiverName" placeholder="Your name" readonly />
-  <input type="text" id="keyInput" placeholder="Enter 4-digit Key" maxlength="4" />
+  <input type="text" id="keyInput" placeholder="Enter file key" />
   <button onclick="checkKey()">Get Files</button>
 
   <div id="fileInfo"></div>
@@ -18,12 +18,20 @@
     let pollInterval = null;
     let activeKey = null;
     let activeReceiver = null;
+    let fileList = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       const name = localStorage.getItem('userName');
       if (name) document.getElementById('receiverName').value = name;
     });
+      
 
+    document.getElementById('keyInput').addEventListener('input', function () {
+    this.value = this.value.toUpperCase();
+  });
+    document.getElementById('receiverName').addEventListener('input', function () {
+      localStorage.setItem('userName', this.value);
+    });
     async function checkKey() {
       const key = document.getElementById('keyInput').value.trim();
       const receiverName = document.getElementById('receiverName').value.trim();
@@ -38,7 +46,6 @@
 
       await fetchAndRenderFileInfo();
 
-      // Start polling every 3 seconds to auto-refresh approval status
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(fetchAndRenderFileInfo, 3000);
     }
@@ -56,30 +63,53 @@
 
       if (res.ok) {
         const data = await res.json();
+        fileList = data.files;
+
         let html = `<p><strong>Sender:</strong> ${data.senderName}</p>`;
         html += `<p><strong>You:</strong> ${data.receiverName}</p>`;
 
         html += `
           <table>
-            <thead><tr><th>File Name</th><th>Download</th></tr></thead>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>
+                  ${data.approved ? `<button id="downloadAllBtn" onclick="downloadAll()">Download All</button>` : ''}
+                </th>
+              </tr>
+            </thead>
             <tbody>
               ${data.files.map(f => `
                 <tr>
                   <td>${f.name}</td>
                   <td>
                     ${data.approved
-                      ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}"><button>Download</button></a>`
+                      ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank"><button>Download</button></a>`
                       : `<span style="color:gray;">Waiting for approval...</span>`}
                   </td>
                 </tr>`).join('')}
             </tbody>
           </table>
         `;
+
         container.innerHTML = html;
       } else {
         container.innerHTML = '<p style="color:red;">Invalid key or server error.</p>';
         clearInterval(pollInterval);
       }
+    }
+
+    function downloadAll() {
+      fileList.forEach(file => {
+        const link = document.createElement('a');
+        link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
+        link.download = file.name;
+        link.target = '_blank';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
     }
   </script>
 </body>
