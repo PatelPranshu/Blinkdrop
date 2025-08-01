@@ -4,123 +4,83 @@
   <meta charset="UTF-8">
   <title>Receive Files</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background-color: #f4f4f4;
-    }
-
-    h2 {
-      margin-bottom: 1rem;
-    }
-
-    input[type="text"] {
-      padding: 0.6rem;
-      font-size: 1rem;
-      width: 200px;
-    }
-
-    button {
-      padding: 0.6rem 1.2rem;
-      margin-left: 10px;
-      font-size: 1rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    table {
-      margin: 2rem auto;
-      border-collapse: collapse;
-      width: 80%;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-
-    th, td {
-      padding: 0.75rem 1rem;
-      text-align: left;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    a button {
-      padding: 5px 10px;
-      background-color: green;
-    }
-
-    a button:hover {
-      background-color: darkgreen;
-    }
-
-    #fileInfo {
-      margin-top: 1rem;
-    }
-  </style>
 </head>
 <body>
-
   <h2>Receive Files</h2>
 
+  <input type="text" id="receiverName" placeholder="Your name" readonly />
   <input type="text" id="keyInput" placeholder="Enter 4-digit Key" maxlength="4" />
   <button onclick="checkKey()">Get Files</button>
 
   <div id="fileInfo"></div>
 
   <script>
+    let pollInterval = null;
+    let activeKey = null;
+    let activeReceiver = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const name = localStorage.getItem('userName');
+      if (name) document.getElementById('receiverName').value = name;
+    });
+
     async function checkKey() {
       const key = document.getElementById('keyInput').value.trim();
-      if (key.length !== 4 || isNaN(key)) {
-        alert('Please enter a valid 4-digit key.');
+      const receiverName = document.getElementById('receiverName').value.trim();
+
+      if (!key || !receiverName) {
+        alert("Enter both name and key.");
         return;
       }
 
-      const res = await fetch(`/file-info/${key}`);
+      activeKey = key;
+      activeReceiver = receiverName;
+
+      await fetchAndRenderFileInfo();
+
+      // Start polling every 3 seconds to auto-refresh approval status
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(fetchAndRenderFileInfo, 3000);
+    }
+
+    async function fetchAndRenderFileInfo() {
+      if (!activeKey || !activeReceiver) return;
+
+      const res = await fetch(`/file-info/${activeKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiverName: activeReceiver })
+      });
+
       const container = document.getElementById('fileInfo');
 
       if (res.ok) {
         const data = await res.json();
+        let html = `<p><strong>Sender:</strong> ${data.senderName}</p>`;
+        html += `<p><strong>You:</strong> ${data.receiverName}</p>`;
 
-        let html = `<p><strong>Sender:</strong> ${data.sender}</p>`;
         html += `
           <table>
-            <thead>
-              <tr>
-                <th>File Name</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+            <thead><tr><th>File Name</th><th>Download</th></tr></thead>
             <tbody>
-              ${data.files.map(file => `
+              ${data.files.map(f => `
                 <tr>
-                  <td>${file.name}</td>
-                  <td><a href="${file.downloadUrl}" download><button>Download</button></a></td>
+                  <td>${f.name}</td>
+                  <td>
+                    ${data.approved
+                      ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}"><button>Download</button></a>`
+                      : `<span style="color:gray;">Waiting for approval...</span>`}
+                  </td>
                 </tr>`).join('')}
             </tbody>
           </table>
         `;
         container.innerHTML = html;
-
       } else {
-        container.innerHTML = `<p style="color:red;">Invalid or expired key.</p>`;
+        container.innerHTML = '<p style="color:red;">Invalid key or server error.</p>';
+        clearInterval(pollInterval);
       }
     }
   </script>
-
 </body>
 </html>

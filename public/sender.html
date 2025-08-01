@@ -4,43 +4,14 @@
   <meta charset="UTF-8" />
   <title>Send Files</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem;
-      background: #f4f4f4;
-      text-align: center;
-    }
-    #drop-zone {
-      border: 3px dashed #007bff;
-      padding: 40px;
-      background-color: white;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 1rem;
-    }
-    #drop-zone.dragover {
-      background-color: #e0f0ff;
-    }
-    table {
-      margin: 1rem auto;
-      border-collapse: collapse;
-      width: 80%;
-      background: white;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 0.5rem 1rem;
-    }
-  </style>
 </head>
 <body>
   <h2>Send Files</h2>
 
+  <input type="text" id="senderName" placeholder="Enter your name" readonly />
+
   <div id="drop-zone">Drag & Drop or Click to Select Files</div>
-  <input type="file" id="fileInput" multiple />
+  <input type="file" id="fileInput" multiple style="display: none;" />
 
   <p id="keyInfo"></p>
   <div id="fileTableContainer"></div>
@@ -49,7 +20,121 @@
     <button id="clearBtn">Clear</button>
   </div>
 
-  <script src="script.js"></script>
-</body>
+  <div id="approveSection" style="margin-top: 2rem;">
+    <h3>Pending Receiver Requests</h3>
+    <div id="pendingRequests"></div>
+  </div>
 
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('fileInput');
+    const senderInput = document.getElementById('senderName');
+    let latestKey = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const name = localStorage.getItem('userName');
+      if (name) senderInput.value = name;
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleMultipleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', () => {
+      handleMultipleFiles(fileInput.files);
+    });
+
+    async function handleMultipleFiles(fileList) {
+      const senderName = senderInput.value.trim();
+      if (!senderName) return alert("Please enter your name");
+
+      const formData = new FormData();
+      formData.append('senderName', senderName);
+      for (const file of fileList) formData.append('files', file);
+
+      const res = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      latestKey = data.key;
+      document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
+
+      const tableHtml = `
+        <table>
+          <thead><tr><th>File Name</th><th>Key</th></tr></thead>
+          <tbody>
+            ${data.files.map(f => `<tr><td>${f.originalName}</td><td>${data.key}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('fileTableContainer').innerHTML = tableHtml;
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('keyInfo').innerHTML = '';
+      document.getElementById('fileTableContainer').innerHTML = '';
+      fileInput.value = null;
+    });
+
+    // Polling for receiver request
+    setInterval(async () => {
+      if (!latestKey) return;
+
+      const res = await fetch(`/file-info/${latestKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiverName: 'POLL' })
+      });
+
+      if (!res.ok) return;
+      const data = await res.json();
+      const receiver = data.receiverName;
+      const approved = data.approved;
+      const requestBox = document.getElementById('pendingRequests');
+
+      // ✅ Only show if receiverName is valid and not already approved
+      if (
+        receiver &&
+        receiver !== 'POLL' &&
+        receiver !== 'null' &&
+        !approved
+      ) {
+        requestBox.innerHTML = `
+          <table>
+            <thead><tr><th>Receiver</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>${receiver}</td>
+                <td><button onclick="approve('${latestKey}', '${receiver}')">Approve</button></td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+      } else {
+        requestBox.innerHTML = '';
+      }
+    }, 3000);
+
+    async function approve(key, receiverName) {
+      await fetch('/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, receiverName })
+      });
+      alert(`Approved ${receiverName}`);
+      document.getElementById('pendingRequests').innerHTML = '';
+    }
+  </script>
+</body>
 </html>

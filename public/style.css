@@ -1,23 +1,81 @@
 body {
-  font-family: sans-serif;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
   padding: 2rem;
-  background: #f4f4f4;
+  text-align: center;
+  margin: 0;
 }
-input, button {
-  padding: 0.5rem;
+
+h2 {
+  margin-bottom: 1.5rem;
+}
+
+input[type="text"] {
+  padding: 0.6rem;
+  width: 250px;
+  font-size: 1rem;
+  margin: 1rem auto;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
   margin: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
 }
-#fileInput{
-    display: none;
+
+button:hover {
+  background-color: #0056b3;
 }
-#clearBtn{
-    padding: 0.6rem 1.2rem;
-    background-color: crimson;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+
+#drop-zone {
+  border: 3px dashed #007bff;
+  padding: 40px;
+  background-color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 1rem auto;
+  width: 80%;
+  max-width: 500px;
 }
-#clearBtn:hover {
-  background-color: darkred;
+
+#drop-zone.dragover {
+  background-color: #e0f0ff;
+}
+
+table {
+  margin: 2rem auto;
+  border-collapse: collapse;
+  width: 90%;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+}
+
+a button {
+  background-color: green;
+}
+
+a button:hover {
+  background-color: darkgreen;
 }

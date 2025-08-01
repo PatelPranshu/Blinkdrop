@@ -1,39 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>File Share App</title>
+  <meta charset="UTF-8">
+  <title>File Share - Home</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #f4f4f4;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-    .btn {
-      padding: 1rem 2rem;
-      margin: 1rem;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background-color: #0056b3;
-    }
-  </style>
 </head>
 <body>
-  <h1>Welcome to Local File Share</h1>
-  <button class="btn" onclick="window.location.href='sender.html'">Send File</button>
-  <button class="btn" onclick="window.location.href='receiver.html'">Receive File</button>
+  <h2>Welcome to File Sharing</h2>
+
+  <input type="text" id="userName" placeholder="Enter your name" />
+  <p>Select your role:</p>
+
+  <button onclick="goToPage('sender')">Sender</button>
+  <button onclick="goToPage('receiver')">Receiver</button>
+
+  <script>
+    function goToPage(role) {
+      const name = document.getElementById('userName').value.trim();
+      if (!name) {
+        alert("Please enter your name first.");
+        return;
+      }
+      localStorage.setItem('userName', name);
+      if (role === 'sender') {
+        window.location.href = 'sender.html';
+      } else {
+        window.location.href = 'receiver.html';
+      }
+    }
+  </script>
 </body>
 </html>
