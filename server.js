@@ -15,6 +15,11 @@ const oAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_REDIRECT_URI
 );
 
+oAuth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+});
+
+
 // If tokens already exist, load them
 if (fs.existsSync(TOKEN_PATH)) {
   const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
@@ -261,6 +266,6 @@ app.post("/admin/delete-all-uploads", async (req, res) => {
 });
 
 // -------------------- Start Server --------------------
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
