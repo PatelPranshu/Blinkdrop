@@ -240,25 +240,37 @@ app.get("/admin/sessions", (req, res) => {
   res.json(sessions);
 });
 // -------------------- Admin Delete All Uploads --------------------
-app.post("/admin/delete-all-uploads", async (req, res) => {
+app.post("/admin/delete-all-uploads", isAdminAuthenticated, async (req, res) => {
   try {
     const drive = google.drive({ version: "v3", auth: oAuth2Client });
+    const folderId = process.env.GDRIVE_FOLDER_ID;
 
-    // Loop through all active transfers
-    for (const key in activeTransfers) {
-      for (const file of activeTransfers[key].files) {
-        try {
-          await drive.files.delete({ fileId: file.id });
-          console.log(`🗑️ Deleted from Drive: ${file.originalName}`);
-        } catch (err) {
-          console.error(`❌ Failed to delete ${file.originalName}:`, err.message);
-        }
+    // 1. Get a list of all files in the specified Google Drive folder
+    const listRes = await drive.files.list({
+      q: `'${folderId}' in parents`,
+      fields: 'files(id, name)',
+    });
+
+    const files = listRes.data.files;
+    if (files.length === 0) {
+      activeTransfers = {}; // Clear memory just in case
+      return res.json({ success: true, message: "No files to delete." });
+    }
+
+    // 2. Loop through the list and delete each file
+    for (const file of files) {
+      try {
+        await drive.files.delete({ fileId: file.id });
+        console.log(`🗑️ Deleted from Drive: ${file.name}`);
+      } catch (err) {
+        console.error(`❌ Failed to delete ${file.name}:`, err.message);
       }
     }
 
-    // Clear in-memory transfers
+    // 3. Clear the local in-memory transfers object
     activeTransfers = {};
     res.json({ success: true });
+
   } catch (err) {
     console.error("❌ Delete All Uploads error:", err);
     res.status(500).json({ error: "Failed to delete uploads" });
