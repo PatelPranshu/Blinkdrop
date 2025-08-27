@@ -70,10 +70,6 @@
                   <ul>
                     ${s.fileDetails.map(f => `
                       <li>${f.name} (${(f.size / 1024).toFixed(2)} KB)
-                        ${f.remainingSeconds !== null
-                          ? `⏳ ${Math.floor(f.remainingSeconds / 60)}m ${f.remainingSeconds % 60}s left`
-                          : ''
-                        }
                       </li>`).join('')}
                   </ul>
                 </td>

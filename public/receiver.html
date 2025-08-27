@@ -94,7 +94,7 @@
             </tbody>
           </table>
         `;
-          const totalSize = data.files.reduce((sum, f) => sum + f.size, 0);
+          const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
           html += `<p><strong>Total Size:</strong> ${formatSize(totalSize)}</p>`;
         container.innerHTML = html;
       } else {

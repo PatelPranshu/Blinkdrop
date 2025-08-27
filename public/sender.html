@@ -2,18 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>Send Files</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    #uploading div { margin: 8px 0; }
+    progress { width: 100%; height: 16px; }
+  </style>
 </head>
 <body>
   <h2>Send Files</h2>
 
   <input type="text" id="senderName" placeholder="Enter your name" readonly />
 
+  <!-- Drag Drop -->
   <div id="drop-zone">Drag & Drop or Click to Select Files</div>
   <input type="file" id="fileInput" multiple style="display: none;" />
+
+  <!-- Uploading animation -->
+  <div id="uploading" style="display:none; margin-top:15px;"></div>
 
   <p id="keyInfo"></p>
   <div id="fileTableContainer"></div>
@@ -31,6 +39,7 @@
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('fileInput');
     const senderInput = document.getElementById('senderName');
+    const uploadingDiv = document.getElementById('uploading');
     let latestKey = null;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -56,50 +65,94 @@
     });
 
     function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
 
-  async function handleMultipleFiles(fileList) {
-    const senderName = senderInput.value.trim();
-    if (!senderName) return alert("Please enter your name");
+    async function handleMultipleFiles(fileList) {
+      const senderName = senderInput.value.trim();
+      if (!senderName) return alert("Please enter your name");
 
-    const formData = new FormData();
-    formData.append('senderName', senderName);
-    for (const file of fileList) formData.append('files', file);
+      // hide drag-drop section
+      dropZone.style.display = "none";
 
-    const res = await fetch('/upload', {
-      method: 'POST',
-      body: formData
-    });
+      document.getElementById('keyInfo').innerHTML = '';
+      document.getElementById('fileTableContainer').innerHTML = '';
+      uploadingDiv.innerHTML = '';
+      uploadingDiv.style.display = "block";
 
-    const data = await res.json();
-    latestKey = data.key;
-    document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
+      const formData = new FormData();
+      formData.append('senderName', senderName);
 
-    const totalSize = data.files.reduce((sum, f) => sum + f.size, 0);
-    const totalFiles = data.files.length;
+      for (const file of fileList) {
+        formData.append('files', file);
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = `
+          <div><b>${file.name}</b> (${formatSize(file.size)})</div>
+          <progress id="prog-${file.name}" value="0" max="100"></progress>
+        `;
+        uploadingDiv.appendChild(wrapper);
+      }
 
-    const tableHtml = `
-      <table>
-        <thead>
-          <tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr>
-          <tr><th>File Name</th><th>Size</th></tr>
-        </thead>
-        <tbody>
-          ${data.files.map(f => `
-            <tr>
-              <td>${f.originalName}</td>
-              <td>${formatSize(f.size)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-      document.getElementById('fileTableContainer').innerHTML = tableHtml;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload");
 
-      fetchPendingReceivers();
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          document.querySelectorAll("#uploading progress").forEach(p => {
+            p.value = percent;
+          });
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          latestKey = data.key;
+
+          document.getElementById('keyInfo').innerHTML =
+            `Share this key: <b>${data.key}</b>`;
+
+          const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
+          const totalFiles = data.files.length;
+
+          const tableHtml = `
+            <table>
+              <thead>
+                <tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr>
+                <tr><th>File Name</th><th>Size</th></tr>
+              </thead>
+              <tbody>
+                ${data.files.map(f => `
+                  <tr>
+                    <td>${f.originalName}</td>
+                    <td>${formatSize(f.size)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+          document.getElementById('fileTableContainer').innerHTML = tableHtml;
+
+          setTimeout(() => {
+            uploadingDiv.style.display = "none";
+          }, 1000);
+
+          fetchPendingReceivers();
+        } else {
+          alert("❌ Upload failed");
+          uploadingDiv.style.display = "none";
+        }
+      };
+
+      xhr.onerror = function () {
+        alert("❌ Upload error");
+        uploadingDiv.style.display = "none";
+      };
+
+      xhr.send(formData);
     }
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -108,6 +161,9 @@
       document.getElementById('pendingRequests').innerHTML = '';
       fileInput.value = null;
       latestKey = null;
+      uploadingDiv.style.display = "none";
+      // show drag-drop section again
+      dropZone.style.display = "block";
     });
 
     async function fetchPendingReceivers() {
@@ -161,7 +217,7 @@
         body: JSON.stringify({ key, receiverName })
       });
 
-      fetchPendingReceivers(); 
+      fetchPendingReceivers();
     }
 
     setInterval(fetchPendingReceivers, 3000);

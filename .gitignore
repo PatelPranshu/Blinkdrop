@@ -1,3 +1,28 @@
-node_modules
-uploads
+# Node modules
+node_modules/
+
+# Environment variables
 .env
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary folders
+temp/
+
+# VS Code settings
+.vscode/
+
+# Dependency directories
+yarn.lock
+
+# Google credentials
+oauth-client.json
+service-account.json
+tokens.json
