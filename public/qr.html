@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>Receive Files</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,11 +11,19 @@
   <div class="beta-ribbon">BETA</div>
   <h2>Receive Files</h2>
 
-  <input type="text" id="receiverName" placeholder="Your name" readonly />
-  <input type="text" id="keyInput" placeholder="Enter file key" />
-  <button onclick="checkKey()">Get Files</button>
+  <!-- Step 1: Name Entry Section -->
+  <div id="nameSection">
+    <p>Files are ready. First, please enter your name.</p>
+    <p>File Key: <b id="keyDisplay"></b></p>
+    <input type="text" id="receiverName" placeholder="Your name" />
+    <button onclick="startReceiving()">Get Files</button>
+  </div>
 
-  <div id="fileInfo"></div>
+  <!-- Step 2: File Info Section (hidden initially) -->
+  <div id="fileSection" style="display:none;">
+      <div id="fileInfo"></div>
+  </div>
+
 
   <script>
     let pollInterval = null;
@@ -23,45 +31,43 @@
     let activeReceiver = null;
     let fileList = [];
 
+    // On page load, get the key from the URL
     document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyFromUrl = urlParams.get('key');
+
+      if (keyFromUrl) {
+        activeKey = keyFromUrl.toUpperCase();
+        document.getElementById('keyDisplay').innerText = activeKey;
+      } else {
+        document.getElementById('nameSection').innerHTML = '<p style="color:red;">No file key provided in the link. Please scan a valid QR code.</p>';
+      }
+      
+      // Pre-fill name if it exists in local storage
       const name = localStorage.getItem('userName');
       if (name) document.getElementById('receiverName').value = name;
     });
       
-     // 1. Get URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
+    // This function is called when the user clicks "Get Files"
+    function startReceiving() {
+        const receiverName = document.getElementById('receiverName').value.trim();
+        if (!receiverName) {
+            alert("Please enter your name.");
+            return;
+        }
 
-      // 2. Check if a 'key' parameter exists
-      const keyFromUrl = urlParams.get('key');
+        // Save name and set global variable
+        localStorage.setItem('userName', receiverName);
+        activeReceiver = receiverName;
 
-      // 3. If it exists, put it in the input box
-      if (keyFromUrl) {
-        document.getElementById('keyInput').value = keyFromUrl.toUpperCase();
-      }
+        // Hide the name entry section and show the file list section
+        document.getElementById('nameSection').style.display = 'none';
+        document.getElementById('fileSection').style.display = 'block';
 
-
-    document.getElementById('keyInput').addEventListener('input', function () {
-    this.value = this.value.toUpperCase();
-  });
-    document.getElementById('receiverName').addEventListener('input', function () {
-      localStorage.setItem('userName', this.value);
-    });
-    async function checkKey() {
-      const key = document.getElementById('keyInput').value.trim();
-      const receiverName = document.getElementById('receiverName').value.trim();
-
-      if (!key || !receiverName) {
-        alert("Enter both name and key.");
-        return;
-      }
-
-      activeKey = key;
-      activeReceiver = receiverName;
-
-      await fetchAndRenderFileInfo();
-
-      if (pollInterval) clearInterval(pollInterval);
-      pollInterval = setInterval(fetchAndRenderFileInfo, 3000);
+        // Start polling for file info
+        fetchAndRenderFileInfo();
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(fetchAndRenderFileInfo, 3000);
     }
 
     async function fetchAndRenderFileInfo() {
@@ -127,6 +133,7 @@
         document.body.removeChild(link);
       });
     }
+    
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
