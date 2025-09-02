@@ -4,10 +4,9 @@ const path = require("path");
 const http = require("http");
 const fs = require("fs");
 require("dotenv").config();
-const { google } = require("googleapis"); // Added Google APIs
+const { google } = require("googleapis");
 
 // -------------------- OAuth Setup --------------------
-// This entire section is restored from your old code.
 const TOKEN_PATH = path.join(__dirname, "tokens.json");
 
 const oAuth2Client = new google.auth.OAuth2(
@@ -26,8 +25,6 @@ if (fs.existsSync(TOKEN_PATH)) {
   oAuth2Client.setCredentials(tokens);
 }
 
-// --- REMOVED: Local 'uploads' directory creation is no longer needed. ---
-
 // -------------------- Express Setup --------------------
 const app = express();
 const server = http.createServer(app);
@@ -37,9 +34,7 @@ app.use(express.static("public", { extensions: ["html"] }));
 app.use(express.json());
 
 // -------------------- Multer (memory storage) --------------------
-// --- MODIFIED: Switched back to memory storage for Google Drive upload ---
 const upload = multer({ storage: multer.memoryStorage() });
-
 
 // -------------------- Admin Credentials --------------------
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
@@ -61,7 +56,6 @@ function generateUniqueKey() {
 }
 
 // -------------------- Auth Routes --------------------
-// Restored from your old code.
 app.get("/auth", (req, res) => {
   const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
   const url = oAuth2Client.generateAuthUrl({
@@ -86,14 +80,46 @@ app.get("/oauth2callback", async (req, res) => {
   }
 });
 
+// -------------------- Google Drive Helper Functions --------------------
 
-// -------------------- Upload to Google Drive --------------------
-// This helper function is restored from your old code.
-async function uploadToDrive(buffer, originalName) {
+/**
+ * Creates a new folder within a specified parent folder on Google Drive.
+ * @param {string} folderName The name of the new folder.
+ * @returns {Promise<string>} The ID of the newly created folder.
+ */
+async function createDriveFolder(folderName) {
+  const drive = google.drive({ version: "v3", auth: oAuth2Client });
+  const fileMetadata = {
+    name: folderName,
+    mimeType: "application/vnd.google-apps.folder",
+    parents: [process.env.GDRIVE_FOLDER_ID], // Parent is your main uploads folder
+  };
+
+  try {
+    const file = await drive.files.create({
+      resource: fileMetadata,
+      fields: "id",
+    });
+    console.log(`📂 Folder created with ID: ${file.data.id}`);
+    return file.data.id;
+  } catch (err) {
+    console.error("❌ Error creating Drive folder:", err);
+    throw err;
+  }
+}
+
+/**
+ * Uploads a file buffer to a specific folder on Google Drive.
+ * @param {Buffer} buffer The file data.
+ * @param {string} originalName The original name of the file.
+ * @param {string} parentFolderId The ID of the parent folder in Google Drive.
+ * @returns {Promise<object>} The Google Drive file resource data.
+ */
+async function uploadToDrive(buffer, originalName, parentFolderId) {
   const drive = google.drive({ version: "v3", auth: oAuth2Client });
   const fileMetadata = {
     name: originalName,
-    parents: [process.env.GDRIVE_FOLDER_ID], // Ensure GDRIVE_FOLDER_ID is in your .env file
+    parents: [parentFolderId], // Use the provided parent folder ID
   };
 
   const media = {
@@ -110,24 +136,25 @@ async function uploadToDrive(buffer, originalName) {
   return res.data;
 }
 
-
 // -------------------- Upload Endpoint --------------------
-// --- MODIFIED: Merged logic from both old and new code ---
 app.post("/upload", upload.array("files", 10), async (req, res) => {
   try {
     const { senderName, approveAll } = req.body;
     const key = generateUniqueKey();
 
     if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: "No files were uploaded." });
+      return res.status(400).json({ error: "No files were uploaded." });
     }
 
-    // Upload each file to Google Drive and collect its metadata.
+    // Create a new folder in Google Drive named with the unique key
+    const senderFolderId = await createDriveFolder(key);
+
+    // Upload each file to the newly created sender-specific folder
     const uploadedFiles = [];
     for (let f of req.files) {
-      const gfile = await uploadToDrive(f.buffer, f.originalname);
+      const gfile = await uploadToDrive(f.buffer, f.originalname, senderFolderId);
       uploadedFiles.push({
-        id: gfile.id, // We store the Google Drive file ID
+        id: gfile.id,
         originalName: gfile.name,
         size: gfile.size,
       });
@@ -135,17 +162,17 @@ app.post("/upload", upload.array("files", 10), async (req, res) => {
 
     activeTransfers[key] = {
       senderName,
-      files: uploadedFiles, // Storing file info from Google Drive
+      files: uploadedFiles,
       approvedReceivers: [],
       pendingReceivers: [],
       createdAt: new Date(),
-      isPublic: approveAll === 'true', // Kept this feature from your new code
+      isPublic: approveAll === 'true',
+      driveFolderId: senderFolderId, // Store the folder ID for potential future use
     };
 
-    // Send back the key and file details to the frontend.
-    res.json({ 
-        key, 
-        files: uploadedFiles.map(f => ({ originalName: f.originalName, size: f.size })) 
+    res.json({
+      key,
+      files: uploadedFiles.map(f => ({ originalName: f.originalName, size: f.size })),
     });
 
   } catch (err) {
@@ -155,7 +182,6 @@ app.post("/upload", upload.array("files", 10), async (req, res) => {
 });
 
 // -------------------- Receiver Requests File Info --------------------
-// --- NO CHANGES NEEDED ---
 app.post("/file-info/:key", (req, res) => {
   const { receiverName } = req.body;
   const key = req.params.key;
@@ -175,24 +201,24 @@ app.post("/file-info/:key", (req, res) => {
 });
 
 // -------------------- Sender Approves Receiver --------------------
-// --- NO CHANGES NEEDED ---
 app.post("/approve", (req, res) => {
   const { key, receiverName } = req.body;
   const transfer = activeTransfers[key];
   if (!transfer) return res.status(404).json({ message: "Key not found" });
-  if (!transfer.approvedReceivers.includes(receiverName)) { transfer.approvedReceivers.push(receiverName); transfer.pendingReceivers = transfer.pendingReceivers.filter((r) => r !== receiverName); }
+  if (!transfer.approvedReceivers.includes(receiverName)) {
+    transfer.approvedReceivers.push(receiverName);
+    transfer.pendingReceivers = transfer.pendingReceivers.filter((r) => r !== receiverName);
+  }
   res.json({ success: true });
 });
 
 // -------------------- Receiver Downloads File --------------------
-// --- MODIFIED: Now downloads from Google Drive ---
 app.get("/download/:key/:index/:receiverName", async (req, res) => {
   try {
     const { key, index, receiverName } = req.params;
     const transfer = activeTransfers[key];
     if (!transfer) return res.status(404).send("Invalid key");
 
-    // This check now includes the 'isPublic' flag
     if (!transfer.isPublic && !transfer.approvedReceivers.includes(receiverName)) {
       return res.status(403).send("Not authorized to download.");
     }
@@ -202,7 +228,6 @@ app.get("/download/:key/:index/:receiverName", async (req, res) => {
       return res.status(404).send("File not found.");
     }
     
-    // Using Google Drive API to get the file stream
     const drive = google.drive({ version: "v3", auth: oAuth2Client });
     const driveRes = await drive.files.get(
       { fileId: file.id, alt: "media" },
@@ -224,40 +249,54 @@ app.get("/download/:key/:index/:receiverName", async (req, res) => {
 });
 
 // -------------------- Admin Login --------------------
-// --- NO CHANGES NEEDED ---
-app.post("/admin/login", (req, res) => { const { username, password } = req.body; if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) { return res.status(200).json({ success: true }); } res.status(401).json({ success: false }); });
+app.post("/admin/login", (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    return res.status(200).json({ success: true });
+  }
+  res.status(401).json({ success: false });
+});
 
 // -------------------- Admin Sessions --------------------
-// --- NO CHANGES NEEDED (but it now includes isPublic) ---
 app.get("/admin/sessions", (req, res) => {
   const sessions = Object.entries(activeTransfers).map(([key, transfer]) => {
     const fileDetails = transfer.files.map((file) => ({ name: file.originalName, size: file.size }));
     const totalSize = fileDetails.reduce((sum, f) => sum + Number(f.size), 0);
-    return { key, senderName: transfer.senderName, receiversWaiting: transfer.pendingReceivers, approvedReceivers: transfer.approvedReceivers, fileDetails, totalSize, createdAt: transfer.createdAt, isPublic: transfer.isPublic };
+    return {
+      key,
+      senderName: transfer.senderName,
+      receiversWaiting: transfer.pendingReceivers,
+      approvedReceivers: transfer.approvedReceivers,
+      fileDetails,
+      totalSize,
+      createdAt: transfer.createdAt,
+      isPublic: transfer.isPublic
+    };
   });
   res.json(sessions);
 });
 
 // -------------------- Admin Delete All Uploads --------------------
-// --- MODIFIED: This now deletes files from Google Drive ---
 app.post("/admin/delete-all-uploads", async (req, res) => {
   try {
     const drive = google.drive({ version: "v3", auth: oAuth2Client });
     const folderId = process.env.GDRIVE_FOLDER_ID;
 
+    // List all files and folders within the main upload directory
     const listRes = await drive.files.list({
       q: `'${folderId}' in parents`,
       fields: 'files(id, name)',
     });
 
-    const files = listRes.data.files;
-    if (files.length > 0) {
-        for (const file of files) {
+    const items = listRes.data.files;
+    if (items.length > 0) {
+        for (const item of items) {
           try {
-            await drive.files.delete({ fileId: file.id });
-            console.log(`🗑️ Deleted from Drive: ${file.name}`);
+            // The delete call works for both files and folders
+            await drive.files.delete({ fileId: item.id });
+            console.log(`🗑️ Deleted from Drive: ${item.name}`);
           } catch (err) {
-            console.error(`❌ Failed to delete ${file.name}:`, err.message);
+            console.error(`❌ Failed to delete ${item.name}:`, err.message);
           }
         }
     }
