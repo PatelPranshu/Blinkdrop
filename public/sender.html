@@ -6,6 +6,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>Send Files</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
   <style>
     #uploading div { margin: 8px 0; }
     progress { width: 100%; height: 16px; }
@@ -24,7 +25,11 @@
   <!-- Uploading animation -->
   <div id="uploading" style="display:none; margin-top:15px;"></div>
 
-  <p id="keyInfo"></p>
+  <div id="share-info" style="display: none; align-items: center; justify-content: center; gap: 20px; margin: 15px 0;">
+    <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
+    <div id="qrcode"></div>
+  </div>
+  
   <div id="fileTableContainer"></div>
 
   <div style="margin-top: 1rem;">
@@ -78,7 +83,7 @@
       // hide drag-drop section
       dropZone.style.display = "none";
 
-      document.getElementById('keyInfo').innerHTML = '';
+      document.getElementById('share-info').style.display = 'none';
       document.getElementById('fileTableContainer').innerHTML = '';
       uploadingDiv.innerHTML = '';
       uploadingDiv.style.display = "block";
@@ -113,8 +118,27 @@
           const data = JSON.parse(xhr.responseText);
           latestKey = data.key;
 
+          // GENERATE AND DISPLAY THE QR CODE ON SUCCESS
           document.getElementById('keyInfo').innerHTML =
             `Share this key: <b>${data.key}</b>`;
+          
+          // First, clear any old QR code
+          document.getElementById('qrcode').innerHTML = ""; 
+
+          // Create the link for the QR code to point to the new qr.html page
+          const receiverUrl = `${window.location.origin}/receiver-qr?key=${data.key}`;
+
+          // Generate the new QR code
+          new QRCode(document.getElementById("qrcode"), {
+              text: receiverUrl,
+              width: 128,
+              height: 128,
+          });
+
+          // Finally, make the container with the key and QR code visible
+          document.getElementById('share-info').style.display = 'flex';
+
+
 
           const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
           const totalFiles = data.files.length;
@@ -157,9 +181,10 @@
     }
 
     document.getElementById('clearBtn').addEventListener('click', () => {
-      document.getElementById('keyInfo').innerHTML = '';
+      document.getElementById('share-info').style.display = 'none';
       document.getElementById('fileTableContainer').innerHTML = '';
       document.getElementById('pendingRequests').innerHTML = '';
+      document.getElementById('qrcode').innerHTML = '';
       fileInput.value = null;
       latestKey = null;
       uploadingDiv.style.display = "none";
