@@ -15,6 +15,8 @@ Thumbs.db
 
 # Temporary folders
 temp/
+uploads/
+public/uploads/
 
 # VS Code settings
 .vscode/
