@@ -137,7 +137,7 @@ async function uploadToDrive(buffer, originalName, parentFolderId) {
 }
 
 // -------------------- Upload Endpoint --------------------
-app.post("/upload", upload.array("files", 10), async (req, res) => {
+app.post("/upload", upload.array("files", 100), async (req, res) => {
   try {
     const { senderName, approveAll } = req.body;
     const key = generateUniqueKey();
