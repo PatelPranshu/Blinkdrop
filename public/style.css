@@ -102,3 +102,18 @@ a button:hover, #downloadAllBtn:hover {
   left: -45px;     /* Adjust to move horizontally */
   transform: rotate(-45deg); /* The magic that creates the diagonal angle */
 } 
+
+
+.pp{
+  height: 20px;
+  width: 100%;
+  background-color: #cfcfcf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 400px;
+}
+.pp a{
+  text-decoration: none;
+  color: rgb(73, 73, 73);
+}
