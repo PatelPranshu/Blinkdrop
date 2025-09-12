@@ -85,6 +85,18 @@ a button:hover, #downloadAllBtn:hover {
 
 
 
+<<<<<<< HEAD
+=======
+  /* Positioning and Rotation */
+  position: absolute;
+  z-index: 9999; /* Ensures the ribbon is on top of other content */
+  top: 30px;      /* Adjust to move vertically */
+  left: -45px;     /* Adjust to move horizontally */
+  transform: rotate(-45deg); /* The magic that creates the diagonal angle */
+} 
+
+
+>>>>>>> e6ab8bca2e05275eef9daf413c2e18d00cb6aba9
 .pp{
   height: 20px;
   width: 100%;
