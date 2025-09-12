@@ -5,6 +5,8 @@ body {
   text-align: center;
   margin: 0;
   overflow-x: hidden;
+  /* height: 100vh; */
+  border: 4px solid #530000;
 }
 
 h2 {
@@ -82,23 +84,17 @@ a button:hover, #downloadAllBtn:hover {
 }
 
 
-.beta-ribbon {
-  /* Basic Styling */
-  width: 180px;
-  background: #5D9CEC; /* A blue similar to your image */
-  color: #000;
-  text-align: center;
-  font-family: sans-serif;
-  font-weight: bold;
-  font-size: 14px;
-  line-height: 2; /* Creates vertical spacing for the text */
-  text-shadow: 0 1px 1px rgba(255,255,255,0.2); /* Adds a subtle highlight to text */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Adds a drop shadow to the ribbon */
 
-  /* Positioning and Rotation */
-  position: absolute;
-  z-index: 9999; /* Ensures the ribbon is on top of other content */
-  top: 30px;      /* Adjust to move vertically */
-  left: -45px;     /* Adjust to move horizontally */
-  transform: rotate(-45deg); /* The magic that creates the diagonal angle */
-} 
+.pp{
+  height: 20px;
+  width: 100%;
+  background-color: #cfcfcf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 400px;
+}
+.pp a{
+  text-decoration: none;
+  color: rgb(73, 73, 73);
+}
