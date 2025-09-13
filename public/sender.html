@@ -1,188 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <title>BlinkDrop – Fast & Secure File Sharing</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-  <style>
-    #uploading div { margin: 8px 0; }
-    progress { width: 100%; height: 16px; }
-    .checkbox-wrapper { 
-      margin-bottom: 15px; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>BlinkDrop – Fast & Secure File Sharing</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <style>
+        #uploading div { margin: 8px 0; }
+        progress { width: 100%; height: 16px; }
+        .checkbox-wrapper { 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+    </style>
 </head>
 <body>
 
-  <h2>Send Files</h2>
+    <h2>Send Files</h2>
 
-  <input type="text" id="senderName" placeholder="Enter your name" readonly />
+    <input type="text" id="senderName" placeholder="Enter your name" readonly />
 
-  <div class="checkbox-wrapper" id="approveAllWrapper">
-    <input type="checkbox" id="approveAll" name="approveAll" style="margin-right: 8px;">
-    <label for="approveAll">Allow anyone with the key to download</label>
-  </div>
+    <div class="checkbox-wrapper" id="approveAllWrapper">
+        <input type="checkbox" id="approveAll" name="approveAll" style="margin-right: 8px;">
+        <label for="approveAll">Allow anyone with the key to download</label>
+    </div>
 
-  <div id="drop-zone">Drag & Drop or Click to Select Files</div>
-  <input type="file" id="fileInput" multiple style="display: none;" />
+    <div id="drop-zone">Drag & Drop or Click to Select Files</div>
+    <input type="file" id="fileInput" multiple style="display: none;" />
 
-  <div id="uploading" style="display:none; margin-top:15px;"></div>
+    <div id="uploading" style="display:none; margin-top:15px;"></div>
 
-  <div id="share-info" style="display: none; align-items: center; justify-content: center; gap: 20px; margin: 15px 0;">
-    <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
-    <div id="qrcode"></div>
-  </div>
+    <div id="share-info" style="display: none; align-items: center; justify-content: center; gap: 20px; margin: 15px 0;">
+        <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
+        <div id="qrcode"></div>
+    </div>
 
-  <div id="fileTableContainer"></div>
+    <div id="fileTableContainer"></div>
 
-  <div style="margin-top: 1rem;">
-    <button id="clearBtn">Clear</button>
-  </div>
+    <div style="margin-top: 1rem;">
+        <button id="clearBtn">Clear</button>
+    </div>
 
-  <div id="approveSection" style="margin-top: 2rem;">
-    <h3>Pending Receiver Requests</h3>
-    <div id="pendingRequests"></div>
-  </div>
+    <div id="approveSection" style="margin-top: 2rem;">
+        <h3>Pending Receiver Requests</h3>
+        <div id="pendingRequests"></div>
+    </div>
 
-  <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('fileInput');
-    const senderInput = document.getElementById('senderName');
-    const uploadingDiv = document.getElementById('uploading');
-    const approveAllCheckbox = document.getElementById('approveAll');
-    let latestKey = null;
-    let pollInterval = null;
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('fileInput');
+        const senderInput = document.getElementById('senderName');
+        const uploadingDiv = document.getElementById('uploading');
+        const approveAllCheckbox = document.getElementById('approveAll');
+        let latestKey = null;
+        let pollInterval = null;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const name = localStorage.getItem('userName');
-      if (name) senderInput.value = name;
-    });
+        // This function restores the session view if a key is found
+        async function restoreSession(key) {
+            latestKey = key;
+            
+            // Fetch session data from the server
+            const res = await fetch('/admin/sessions');
+            if (!res.ok) {
+                sessionStorage.removeItem('activeTransferKey'); // Clear bad key
+                return;
+            }
+            const sessions = await res.json();
+            const session = sessions.find(s => s.key === key);
 
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleMultipleFiles(e.dataTransfer.files); });
-    fileInput.addEventListener('change', () => { handleMultipleFiles(fileInput.files); });
+            if (!session) {
+                // If the key is invalid or the server restarted, clear it
+                sessionStorage.removeItem('activeTransferKey');
+                return;
+            }
 
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-    }
+            // Hide the initial upload elements
+            dropZone.style.display = "none";
+            document.getElementById('approveAllWrapper').style.display = 'none';
 
-    async function handleMultipleFiles(fileList) {
-      const senderName = senderInput.value.trim();
-      if (!senderName) return alert("Please enter your name");
+            // Display the key and QR code
+            document.getElementById('keyInfo').innerHTML = `Share this key: <b>${session.key}</b>`;
+            document.getElementById('qrcode').innerHTML = ""; 
+            const receiverUrl = `${window.location.origin}/receiver-qr?key=${session.key}`;
+            new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
+            document.getElementById('share-info').style.display = 'flex';
 
-      dropZone.style.display = "none";
-      // CHANGE 2: Hide the "Approve All" wrapper when files are selected
-      document.getElementById('approveAllWrapper').style.display = 'none';
-      
-      document.getElementById('share-info').style.display = 'none';
-      document.getElementById('fileTableContainer').innerHTML = '';
-      uploadingDiv.innerHTML = '';
-      uploadingDiv.style.display = "block";
+            // Display the file table
+            const totalSize = session.fileDetails.reduce((sum, f) => sum + Number(f.size), 0);
+            const totalFiles = session.fileDetails.length;
+            const tableHtml = `<table><thead><tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${session.fileDetails.map(f => `<tr><td>${f.name}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
+            document.getElementById('fileTableContainer').innerHTML = tableHtml;
 
-      const formData = new FormData();
-      formData.append('senderName', senderName);
-      formData.append('approveAll', approveAllCheckbox.checked);
-
-      for (const file of fileList) {
-        formData.append('files', file);
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = `<div><b>${file.name}</b> (${formatSize(file.size)})</div><progress value="0" max="100"></progress>`;
-        uploadingDiv.appendChild(wrapper);
-      }
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/upload");
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percent = (e.loaded / e.total) * 100;
-          document.querySelectorAll("#uploading progress").forEach(p => p.value = percent);
+            // Handle the approve section visibility and start polling
+            if (session.isPublic) {
+                document.getElementById('approveSection').style.display = 'none';
+            } else {
+                document.getElementById('approveSection').style.display = 'block';
+                fetchPendingReceivers();
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(fetchPendingReceivers, 3000);
+            }
         }
-      };
 
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          latestKey = data.key;
+        document.addEventListener("DOMContentLoaded", () => {
+            const name = localStorage.getItem('userName');
+            if (name) senderInput.value = name;
 
-          document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
-          document.getElementById('qrcode').innerHTML = ""; 
-          const receiverUrl = `${window.location.origin}/receiver-qr?key=${data.key}`;
-          new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
-          document.getElementById('share-info').style.display = 'flex';
+            // Check for an active key in sessionStorage when the page loads
+            const activeKey = sessionStorage.getItem('activeTransferKey');
+            if (activeKey) {
+                restoreSession(activeKey);
+            }
+        });
 
-          const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
-          const totalFiles = data.files.length;
-          const tableHtml = `<table><thead><tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${data.files.map(f => `<tr><td>${f.originalName}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
-          document.getElementById('fileTableContainer').innerHTML = tableHtml;
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleMultipleFiles(e.dataTransfer.files); });
+        fileInput.addEventListener('change', () => { handleMultipleFiles(fileInput.files); });
 
-          setTimeout(() => { uploadingDiv.style.display = "none"; }, 1000);
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
 
-          if (approveAllCheckbox.checked) {
-            document.getElementById('approveSection').style.display = 'none';
-          } else {
+        async function handleMultipleFiles(fileList) {
+            const senderName = senderInput.value.trim();
+            if (!senderName) return alert("Please enter your name");
+
+            dropZone.style.display = "none";
+            document.getElementById('approveAllWrapper').style.display = 'none';
+            
+            document.getElementById('share-info').style.display = 'none';
+            document.getElementById('fileTableContainer').innerHTML = '';
+            uploadingDiv.innerHTML = '';
+            uploadingDiv.style.display = "block";
+
+            const formData = new FormData();
+            formData.append('senderName', senderName);
+            formData.append('approveAll', approveAllCheckbox.checked);
+
+            for (const file of fileList) {
+                formData.append('files', file);
+                const wrapper = document.createElement("div");
+                wrapper.innerHTML = `<div><b>${file.name}</b> (${formatSize(file.size)})</div><progress value="0" max="100"></progress>`;
+                uploadingDiv.appendChild(wrapper);
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload");
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    document.querySelectorAll("#uploading progress").forEach(p => p.value = percent);
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    latestKey = data.key;
+
+                    // Save the generated key to sessionStorage
+                    sessionStorage.setItem('activeTransferKey', data.key);
+
+                    document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
+                    document.getElementById('qrcode').innerHTML = ""; 
+                    const receiverUrl = `${window.location.origin}/receiver-qr?key=${data.key}`;
+                    new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
+                    document.getElementById('share-info').style.display = 'flex';
+
+                    const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
+                    const totalFiles = data.files.length;
+                    const tableHtml = `<table><thead><tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${data.files.map(f => `<tr><td>${f.originalName}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
+                    document.getElementById('fileTableContainer').innerHTML = tableHtml;
+
+                    setTimeout(() => { uploadingDiv.style.display = "none"; }, 1000);
+
+                    if (approveAllCheckbox.checked) {
+                        document.getElementById('approveSection').style.display = 'none';
+                    } else {
+                        document.getElementById('approveSection').style.display = 'block';
+                        fetchPendingReceivers();
+                        if (pollInterval) clearInterval(pollInterval);
+                        pollInterval = setInterval(fetchPendingReceivers, 3000);
+                    }
+
+                } else {
+                    alert("❌ Upload failed");
+                    uploadingDiv.style.display = "none";
+                }
+            };
+
+            xhr.onerror = function () { alert("❌ Upload error"); uploadingDiv.style.display = "none"; };
+            xhr.send(formData);
+        }
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            // Clear the key from sessionStorage
+            sessionStorage.removeItem('activeTransferKey');
+
+            document.getElementById('share-info').style.display = 'none';
+            document.getElementById('fileTableContainer').innerHTML = '';
+            document.getElementById('pendingRequests').innerHTML = '';
+            document.getElementById('qrcode').innerHTML = '';
+            fileInput.value = null;
+            latestKey = null;
+            uploadingDiv.style.display = "none";
+            dropZone.style.display = "block";
+            document.getElementById('approveAllWrapper').style.display = 'flex';
+            
+            approveAllCheckbox.checked = false;
             document.getElementById('approveSection').style.display = 'block';
-            fetchPendingReceivers();
             if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(fetchPendingReceivers, 3000);
-          }
+        });
 
-        } else {
-          alert("❌ Upload failed");
-          uploadingDiv.style.display = "none";
+        async function fetchPendingReceivers() {
+            if (!latestKey) return;
+            const res = await fetch('/admin/sessions');
+            const sessions = await res.json();
+            const session = sessions.find(s => s.key === latestKey);
+            if (!session) return;
+            const pendingList = session.receiversWaiting || [];
+            const approvedList = session.approvedReceivers || [];
+            const tableRows = pendingList.map((r, index) => {
+                const isApproved = approvedList.includes(r);
+                return `<tr><td>${index + 1}</td><td><b>${r}</b></td><td>${isApproved ? '<button disabled style="background-color: #4CAF50; color: white;">Approved</button>' : `<button onclick="approve('${latestKey}', '${r}')">Approve</button>`}</td></tr>`;
+            }).join('');
+            document.getElementById('pendingRequests').innerHTML = `<table border="1" cellpadding="8" cellspacing="0"><thead><tr><th>No.</th><th>Receiver Name</th><th>Action</th></tr></thead><tbody>${tableRows}</tbody></table>`;
         }
-      };
 
-      xhr.onerror = function () { alert("❌ Upload error"); uploadingDiv.style.display = "none"; };
-      xhr.send(formData);
-    }
-
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      document.getElementById('share-info').style.display = 'none';
-      document.getElementById('fileTableContainer').innerHTML = '';
-      document.getElementById('pendingRequests').innerHTML = '';
-      document.getElementById('qrcode').innerHTML = '';
-      fileInput.value = null;
-      latestKey = null;
-      uploadingDiv.style.display = "none";
-      dropZone.style.display = "block";
-      // CHANGE 3: Show the "Approve All" wrapper again when clearing
-      document.getElementById('approveAllWrapper').style.display = 'flex';
-      
-      approveAllCheckbox.checked = false;
-      document.getElementById('approveSection').style.display = 'block';
-      if (pollInterval) clearInterval(pollInterval);
-    });
-
-    async function fetchPendingReceivers() {
-      if (!latestKey) return;
-      const res = await fetch('/admin/sessions');
-      const sessions = await res.json();
-      const session = sessions.find(s => s.key === latestKey);
-      if (!session) return;
-      const pendingList = session.receiversWaiting || [];
-      const approvedList = session.approvedReceivers || [];
-      const tableRows = pendingList.map((r, index) => {
-        const isApproved = approvedList.includes(r);
-        return `<tr><td>${index + 1}</td><td><b>${r}</b></td><td>${isApproved ? '<button disabled style="background-color: #4CAF50; color: white;">Approved</button>' : `<button onclick="approve('${latestKey}', '${r}')">Approve</button>`}</td></tr>`;
-      }).join('');
-      document.getElementById('pendingRequests').innerHTML = `<table border="1" cellpadding="8" cellspacing="0"><thead><tr><th>No.</th><th>Receiver Name</th><th>Action</th></tr></thead><tbody>${tableRows}</tbody></table>`;
-    }
-
-    async function approve(key, receiverName) {
-      await fetch('/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, receiverName }) });
-      fetchPendingReceivers();
-    }
-  </script>
+        async function approve(key, receiverName) {
+            await fetch('/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, receiverName }) });
+            fetchPendingReceivers();
+        }
+    </script>
 </body>
 </html>
