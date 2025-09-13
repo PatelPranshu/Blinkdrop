@@ -33,8 +33,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static("public", { extensions: ["html"] }));
 app.use(express.json());
 
-// -------------------- Multer (memory storage) --------------------
-const upload = multer({ storage: multer.memoryStorage() });
+// -------------------- Multer (disk storage) --------------------
+const uploadFolder = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
+
+const storage = multer.diskStorage({
+  destination: uploadFolder,
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 1024 * 1024 * 1024 }, // optional: 1 GB per file
+});
 
 // -------------------- Admin Credentials --------------------
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
@@ -81,18 +91,12 @@ app.get("/oauth2callback", async (req, res) => {
 });
 
 // -------------------- Google Drive Helper Functions --------------------
-
-/**
- * Creates a new folder within a specified parent folder on Google Drive.
- * @param {string} folderName The name of the new folder.
- * @returns {Promise<string>} The ID of the newly created folder.
- */
 async function createDriveFolder(folderName) {
   const drive = google.drive({ version: "v3", auth: oAuth2Client });
   const fileMetadata = {
     name: folderName,
     mimeType: "application/vnd.google-apps.folder",
-    parents: [process.env.GDRIVE_FOLDER_ID], // Parent is your main uploads folder
+    parents: [process.env.GDRIVE_FOLDER_ID],
   };
 
   try {
@@ -108,23 +112,16 @@ async function createDriveFolder(folderName) {
   }
 }
 
-/**
- * Uploads a file buffer to a specific folder on Google Drive.
- * @param {Buffer} buffer The file data.
- * @param {string} originalName The original name of the file.
- * @param {string} parentFolderId The ID of the parent folder in Google Drive.
- * @returns {Promise<object>} The Google Drive file resource data.
- */
-async function uploadToDrive(buffer, originalName, parentFolderId) {
+async function uploadToDrive(filePath, originalName, parentFolderId) {
   const drive = google.drive({ version: "v3", auth: oAuth2Client });
   const fileMetadata = {
     name: originalName,
-    parents: [parentFolderId], // Use the provided parent folder ID
+    parents: [parentFolderId],
   };
 
   const media = {
     mimeType: "application/octet-stream",
-    body: require("stream").Readable.from(buffer),
+    body: fs.createReadStream(filePath),
   };
 
   const res = await drive.files.create({
@@ -146,18 +143,17 @@ app.post("/upload", upload.array("files", 100), async (req, res) => {
       return res.status(400).json({ error: "No files were uploaded." });
     }
 
-    // Create a new folder in Google Drive named with the unique key
     const senderFolderId = await createDriveFolder(key);
 
-    // Upload each file to the newly created sender-specific folder
     const uploadedFiles = [];
     for (let f of req.files) {
-      const gfile = await uploadToDrive(f.buffer, f.originalname, senderFolderId);
+      const gfile = await uploadToDrive(f.path, f.originalname, senderFolderId);
       uploadedFiles.push({
         id: gfile.id,
         originalName: gfile.name,
         size: gfile.size,
       });
+      fs.unlink(f.path, () => {}); // delete local temp file after upload
     }
 
     activeTransfers[key] = {
@@ -166,8 +162,8 @@ app.post("/upload", upload.array("files", 100), async (req, res) => {
       approvedReceivers: [],
       pendingReceivers: [],
       createdAt: new Date(),
-      isPublic: approveAll === 'true',
-      driveFolderId: senderFolderId, // Store the folder ID for potential future use
+      isPublic: approveAll === "true",
+      driveFolderId: senderFolderId,
     };
 
     res.json({
@@ -282,7 +278,6 @@ app.post("/admin/delete-all-uploads", async (req, res) => {
     const drive = google.drive({ version: "v3", auth: oAuth2Client });
     const folderId = process.env.GDRIVE_FOLDER_ID;
 
-    // List all files and folders within the main upload directory
     const listRes = await drive.files.list({
       q: `'${folderId}' in parents`,
       fields: 'files(id, name)',
@@ -292,7 +287,6 @@ app.post("/admin/delete-all-uploads", async (req, res) => {
     if (items.length > 0) {
         for (const item of items) {
           try {
-            // The delete call works for both files and folders
             await drive.files.delete({ fileId: item.id });
             console.log(`🗑️ Deleted from Drive: ${item.name}`);
           } catch (err) {
@@ -301,7 +295,7 @@ app.post("/admin/delete-all-uploads", async (req, res) => {
         }
     }
 
-    activeTransfers = {}; // Clear the in-memory transfers object
+    activeTransfers = {};
     res.json({ success: true });
 
   } catch (err) {
