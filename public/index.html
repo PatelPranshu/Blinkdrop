@@ -18,73 +18,171 @@
   <link rel="stylesheet" href="style.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6476825082501261"
      crossorigin="anonymous"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background-color: #f5f5f5;
-    }
+<style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
 
-    h2 {
-      margin-bottom: 30px;
-    }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
 
-    input[type="text"] {
-      padding: 10px;
-      width: 250px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
-    }
+        .app-header h1 {
+            font-size: 3em;
+            color: #007bff;
+            margin-bottom: 0;
+        }
 
-    .role-options {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
+        .app-header h2 {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: 40px;
+        }
 
-    .role-btn {
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s ease;
-    }
+        .description-section {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            text-align: left;
+            margin-top: 100px;
+        }
 
-    .role-btn:hover {
-      background-color: #0056b3;
-    }
-  </style>
+        .description-section h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #007bff;
+        }
+        
+        .description-section ol {
+            padding-left: 20px;
+        }
+
+        .description-section li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .disclaimer {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .action-section {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-section h3 {
+             margin-top: 0;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+
+        .role-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .role-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .role-btn:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #e9e9e9;
+            width: 100vw;
+            /* Position it at the very bottom */
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        footer a {
+            text-decoration: none;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
 
-  <h2>Enter Your Name and Select Role</h2>
+    <div class="container">
 
-  <input type="text" id="userName" placeholder="Your name" />
-
-  <div class="role-options">
-    <button class="role-btn" onclick="goToRole('sender')">Sender</button>
-    <button class="role-btn" onclick="goToRole('receiver')">Receiver</button>
-  </div>
+        <header class="app-header">
+            <h1>Blinkdrop</h1>
+            <h2>Simple, Secure, and Instant File Sharing.</h2>
+        </header>
 
 
- <div class="pp">
-    <a href="/privacy-policy">Privacy & Policy</a>
- </div>
 
-  <script>
-    function goToRole(role) {
-      const name = document.getElementById('userName').value.trim();
-      if (!name) return alert("Please enter your name");
+        <section class="action-section">
+            <h3>Get Started</h3>
+            <input type="text" id="userName" placeholder="Enter your name" />
+            <div class="role-options">
+                <button class="role-btn" onclick="goToRole('sender')">I want to Send Files</button>
+                <button class="role-btn" onclick="goToRole('receiver')">I want to Receive Files</button>
+            </div>
+        </section>
 
-      localStorage.setItem('userName', name);
-      window.location.href = `/${role}`;
-    }
-  </script>
+                <section class="description-section">
+            <h3>How It Works</h3>
+            <ol>
+                <li><strong>Send Files:</strong> As a sender, you select files for sharing. Our service generates a secret key.</li>
+                <li><strong>Share the Key:</strong> You securely share this key with your intended recipient.</li>
+                <li><strong>Receive Files:</strong> The recipient visits our site, enters their name and the secret key, and can then securely download the files.</li>
+            </ol>
+            <p class="disclaimer">
+                Blinkdrop uses the official Google Drive API to manage files. By signing in, you grant our application permission to create folders and upload/download files within your Google Drive for the sole purpose of enabling this sharing service.
+            </p>
+        </section>
+    </div>
+
+    <footer>
+        <a href="/privacy-policy">Privacy & Policy</a>
+    </footer>
+
+    <script>
+        function goToRole(role) {
+            const name = document.getElementById('userName').value.trim();
+            if (!name) {
+                alert("Please enter your name before selecting a role.");
+                return;
+            }
+            localStorage.setItem('userName', name);
+            window.location.href = `/${role}`;
+        }
+    </script>
 </body>
 </html>
