@@ -7,23 +7,15 @@ require("dotenv").config();
 const { google } = require("googleapis");
 
 // -------------------- OAuth Setup --------------------
-const TOKEN_PATH = path.join(__dirname, "tokens.json");
-
 const oAuth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
 );
 
 oAuth2Client.setCredentials({
-  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
 });
-
-// If tokens already exist, load them
-if (fs.existsSync(TOKEN_PATH)) {
-  const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
-  oAuth2Client.setCredentials(tokens);
-}
 
 // -------------------- Express Setup --------------------
 const app = express();
@@ -75,19 +67,35 @@ app.get("/auth", (req, res) => {
   res.redirect(url);
 });
 
+// DELETE your old /oauth2callback route and PASTE this one.
 app.get("/oauth2callback", async (req, res) => {
-  const code = req.query.code;
-  if (!code) return res.status(400).send("No code received");
+    const code = req.query.code;
+    if (!code) {
+        return res.status(400).send("No code received from Google.");
+    }
 
-  try {
-    const { tokens } = await oAuth2Client.getToken(code);
-    oAuth2Client.setCredentials(tokens);
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
-    res.send("✅ Authentication successful! You can now upload files.");
-  } catch (err) {
-    console.error("OAuth callback error:", err);
-    res.status(500).send("Auth failed");
-  }
+    try {
+        const { tokens } = await oAuth2Client.getToken(code);
+        oAuth2Client.setCredentials(tokens);
+
+        // This is the most important part for you
+        if (tokens.refresh_token) {
+            console.log("====================================================");
+            console.log("✅ NEW REFRESH TOKEN GENERATED!");
+            console.log("Copy this value and paste it into your .env file for the");
+            console.log("GOOGLE_REFRESH_TOKEN variable.");
+            console.log("👇");
+            console.log(tokens.refresh_token);
+            console.log("====================================================");
+            res.send("✅ Authentication successful! Check your terminal for the new refresh token.");
+        } else {
+            res.send("Authentication successful, but no new refresh token was provided by Google. This usually happens if you have already authorized this app. To get a new one, you must first revoke access at https://myaccount.google.com/permissions.");
+        }
+
+    } catch (err) {
+        console.error("❌ OAuth callback error:", err.message);
+        res.status(500).send("Auth failed. Check the server terminal for details.");
+    }
 });
 
 // -------------------- Google Drive Helper Functions --------------------
