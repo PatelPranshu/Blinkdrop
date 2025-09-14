@@ -5,7 +5,6 @@ body {
   text-align: center;
   margin: 0;
   overflow-x: hidden;
-<<<<<<< HEAD
 }
 .page-content {
   padding: 2rem;
@@ -20,8 +19,6 @@ body {
 
   padding: 0.75rem 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-=======
->>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
 }
 
 .app-header .brand {
@@ -158,7 +155,6 @@ a button:hover, #downloadAllBtn:hover {
   text-decoration: none;
   color: rgb(73, 73, 73);
 }
-<<<<<<< HEAD
 
 #share-info {
   display: none;                     /* hidden until shown by JS */
@@ -219,5 +215,4 @@ a button:hover, #downloadAllBtn:hover {
   height: 1px;
   }
 }
-=======
->>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
+
