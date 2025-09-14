@@ -1,13 +1,75 @@
 body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f4f4f4;
-  padding: 2rem;
+  /* padding: 2rem; */
   text-align: center;
   margin: 0;
   overflow-x: hidden;
+<<<<<<< HEAD
+}
+.page-content {
+  padding: 2rem;
+}
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* margin-bottom: 100px; */
+  background: #ffffff;
+  color: #000000;
+
+  padding: 0.75rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+=======
+>>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
 }
 
-h2 {
+.app-header .brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none; /* remove link underline */
+  color: inherit;        /* keep white color */
+}
+
+.app-header .brand:hover {
+  opacity: 0.85;          /* slight hover effect */
+}
+
+.app-header .brand .logo img {
+  height: 40px;
+  width: 40px;
+  margin-right: 0.5rem;
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-right: 2rem;
+  white-space: nowrap;
+}
+
+.app-header h2 {
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.85;
+  flex: 1;
+  text-align: right;
+}
+
+/* Responsive: stack on very small screens */
+@media (max-width: 600px) {
+  .app-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .app-header h2 {
+    text-align: center;
+    margin-top: 0.25rem;
+  }
+}
+
+.page-content h2 {
   margin-bottom: 1.5rem;
 }
 
@@ -96,3 +158,66 @@ a button:hover, #downloadAllBtn:hover {
   text-decoration: none;
   color: rgb(73, 73, 73);
 }
+<<<<<<< HEAD
+
+#share-info {
+  display: none;                     /* hidden until shown by JS */
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin: 2rem auto;
+  padding: 1.5rem 2rem;
+
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 800px;
+}
+
+#share-info p#keyInfo {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+#share-info #qrcode {
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+
+#copyLinkBtn {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+#copyLinkBtn:hover {
+  background-color: #218838;
+}
+.divider {
+  width: 1px;
+  height: 100px;
+  background-color: #ccc;
+}
+
+@media (max-width: 700px) {
+  #share-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .divider {
+  width: 100px;
+  height: 1px;
+  }
+}
+=======
+>>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1

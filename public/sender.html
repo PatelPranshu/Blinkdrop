@@ -20,6 +20,41 @@
 </head>
 <body>
 
+<<<<<<< HEAD
+    <header class="app-header">
+        <a href="/" class="brand">
+            <div class="logo">
+            <img src="favicon.png" alt="Blinkdrop Logo">
+            </div>
+            <h1>Blinkdrop</h1>
+        </a>
+        <h2>Simple, Secure, and Instant File Sharing.</h2>
+    </header>
+
+    <main class="page-content">
+
+
+    <h2>Send Files</h2>
+
+    <input type="text" id="senderName" placeholder="Enter your name" readonly />
+
+    <div class="checkbox-wrapper" id="approveAllWrapper">
+        <input type="checkbox" id="approveAll" name="approveAll" style="margin-right: 8px;">
+        <label for="approveAll">Allow anyone with the key to download</label>
+    </div>
+
+    <div id="drop-zone">Drag & Drop or Click to Select Files</div>
+    <input type="file" id="fileInput" multiple style="display: none;" />
+
+    <div id="uploading" style="display:none; margin-top:15px;"></div>
+
+    <div id="share-info" style="display: none;">
+    <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
+     <div class="divider"></div>
+    <div id="qrcode"></div>
+     <div class="divider"></div>
+    <button id="copyLinkBtn">Copy Link</button>
+=======
     <h2>Send Files</h2>
 
     <input type="text" id="senderName" placeholder="Enter your name" readonly />
@@ -37,6 +72,7 @@
     <div id="share-info" style="display: none; align-items: center; justify-content: center; gap: 20px; margin: 15px 0;">
         <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
         <div id="qrcode"></div>
+>>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
     </div>
 
     <div id="fileTableContainer"></div>
@@ -49,6 +85,72 @@
         <h3>Pending Receiver Requests</h3>
         <div id="pendingRequests"></div>
     </div>
+<<<<<<< HEAD
+  </main>
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('fileInput');
+        const senderInput = document.getElementById('senderName');
+        const uploadingDiv = document.getElementById('uploading');
+        const approveAllCheckbox = document.getElementById('approveAll');
+        let latestKey = null;
+        let pollInterval = null;
+
+        // This function restores the session view if a key is found
+        async function restoreSession(key) {
+            latestKey = key;
+            
+            // Fetch session data from the server
+            const res = await fetch('/admin/sessions');
+            if (!res.ok) {
+                sessionStorage.removeItem('activeTransferKey'); // Clear bad key
+                return;
+            }
+            const sessions = await res.json();
+            const session = sessions.find(s => s.key === key);
+
+            if (!session) {
+                // If the key is invalid or the server restarted, clear it
+                sessionStorage.removeItem('activeTransferKey');
+                return;
+            }
+
+            // Hide the initial upload elements
+            dropZone.style.display = "none";
+            document.getElementById('approveAllWrapper').style.display = 'none';
+
+            // Display the key and QR code
+            document.getElementById('keyInfo').innerHTML = `Share this key: <b>${session.key}</b>`;
+            document.getElementById('qrcode').innerHTML = ""; 
+            const receiverUrl = `${window.location.origin}/receiver-qr?key=${session.key}`;
+            new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
+
+            // Setup copy link button
+            document.getElementById('copyLinkBtn').dataset.link = receiverUrl;
+            const copyLinkBtn = document.getElementById('copyLinkBtn');
+            copyLinkBtn.addEventListener('click', async () => {
+            const link = copyLinkBtn.dataset.link;
+            if (!link) return;
+
+            try {
+                await navigator.clipboard.writeText(link);
+                copyLinkBtn.textContent = 'Copied!';
+                setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
+            } catch (err) {
+                alert('❌ Failed to copy');
+            }
+            });
+
+
+            document.getElementById('share-info').style.display = 'flex';
+
+            // Display the file table
+            const totalSize = session.fileDetails.reduce((sum, f) => sum + Number(f.size), 0);
+            const totalFiles = session.fileDetails.length;
+            const tableHtml = `<table><thead><tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${session.fileDetails.map(f => `<tr><td>${f.name}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
+            document.getElementById('fileTableContainer').innerHTML = tableHtml;
+
+=======
 
     <script>
         const dropZone = document.getElementById('drop-zone');
@@ -95,6 +197,7 @@
             const tableHtml = `<table><thead><tr><th colspan="2">Total: ${totalFiles} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${session.fileDetails.map(f => `<tr><td>${f.name}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
             document.getElementById('fileTableContainer').innerHTML = tableHtml;
 
+>>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
             // Handle the approve section visibility and start polling
             if (session.isPublic) {
                 document.getElementById('approveSection').style.display = 'none';

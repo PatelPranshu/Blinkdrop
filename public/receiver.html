@@ -8,7 +8,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+ <header class="app-header">
+        <a href="/" class="brand">
+            <div class="logo">
+            <img src="favicon.png" alt="Blinkdrop Logo">
+            </div>
+            <h1>Blinkdrop</h1>
+        </a>
+        <h2>Simple, Secure, and Instant File Sharing.</h2>
+    </header>
+  <main class="page-content">
   <h2>Receive Files</h2>
 
   <input type="text" id="receiverName" placeholder="Your name" readonly />
@@ -16,7 +25,7 @@
   <button onclick="checkKey()">Get Files</button>
 
   <div id="fileInfo"></div>
-
+  </main>
   <script>
     let pollInterval = null;
     let activeKey = null;
