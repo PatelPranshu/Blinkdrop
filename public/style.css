@@ -216,3 +216,22 @@ a button:hover, #downloadAllBtn:hover {
   }
 }
 
+
+.receive-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem; /* Creates space between the form elements */
+  margin-bottom: 2rem; /* Adds space below the button */
+}
+
+/* 2. Override the margin ONLY for inputs inside our form */
+.receive-form input[type="text"] {
+  margin: 0; /* Resets the large margin from the general rule */
+}
+
+/* 3. Override the margin ONLY for the button inside our form */
+.receive-form button {
+  margin: 0; /* Resets the margin from the general rule */
+  width: 266px; /* Optional: Makes the button width match the inputs */
+}
