@@ -22,7 +22,6 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-<<<<<<< HEAD
 
             background-color: #f5f5f5;
             color: #333;
@@ -54,51 +53,6 @@
             padding-left: 20px;
         }
 
-=======
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .app-header h1 {
-            font-size: 3em;
-            color: #007bff;
-            margin-bottom: 0;
-        }
-
-        .app-header h2 {
-            font-size: 1.2em;
-            color: #555;
-            margin-top: 5px;
-            margin-bottom: 40px;
-        }
-
-        .description-section {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
-            text-align: left;
-            margin-top: 100px;
-        }
-
-        .description-section h3 {
-            text-align: center;
-            margin-top: 0;
-            color: #007bff;
-        }
-        
-        .description-section ol {
-            padding-left: 20px;
-        }
-
->>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
         .description-section li {
             margin-bottom: 10px;
             line-height: 1.5;
@@ -181,7 +135,6 @@
         <h2>Simple, Secure, and Instant File Sharing.</h2>
     </header>
 
-<<<<<<< HEAD
   <main class="page-content">
     <div class="container">
         <section class="action-section">
@@ -210,43 +163,6 @@
         <a href="/privacy-policy">Privacy & Policy</a>
     </footer>
 
-=======
-    <div class="container">
-
-        <header class="app-header">
-            <h1>Blinkdrop</h1>
-            <h2>Simple, Secure, and Instant File Sharing.</h2>
-        </header>
-
-
-
-        <section class="action-section">
-            <h3>Get Started</h3>
-            <input type="text" id="userName" placeholder="Enter your name" />
-            <div class="role-options">
-                <button class="role-btn" onclick="goToRole('sender')">I want to Send Files</button>
-                <button class="role-btn" onclick="goToRole('receiver')">I want to Receive Files</button>
-            </div>
-        </section>
-
-                <section class="description-section">
-            <h3>How It Works</h3>
-            <ol>
-                <li><strong>Send Files:</strong> As a sender, you select files for sharing. Our service generates a secret key.</li>
-                <li><strong>Share the Key:</strong> You securely share this key with your intended recipient.</li>
-                <li><strong>Receive Files:</strong> The recipient visits our site, enters their name and the secret key, and can then securely download the files.</li>
-            </ol>
-            <p class="disclaimer">
-               Blinkdrop uses the official Google Drive API to manage files. Google Drive to store all the shared files to become accessible for the receiver.
-            </p>
-        </section>
-    </div>
-
-    <footer>
-        <a href="/privacy-policy">Privacy & Policy</a>
-    </footer>
-
->>>>>>> 0da466085a16d24a167c1c75cf603aaef3cef0b1
     <script>
         function goToRole(role) {
             const name = document.getElementById('userName').value.trim();
