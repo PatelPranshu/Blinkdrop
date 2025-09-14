@@ -108,17 +108,18 @@
             document.getElementById('copyLinkBtn').dataset.link = receiverUrl;
             const copyLinkBtn = document.getElementById('copyLinkBtn');
             copyLinkBtn.addEventListener('click', async () => {
-            const link = copyLinkBtn.dataset.link;
-            if (!link) return;
+                const link = copyLinkBtn.dataset.link;
+                if (!link) return;
 
-            try {
-                await navigator.clipboard.writeText(link);
-                copyLinkBtn.textContent = 'Copied!';
-                setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
-            } catch (err) {
-                alert('❌ Failed to copy');
-            }
+                try {
+                    await navigator.clipboard.writeText(link);
+                    copyLinkBtn.textContent = 'Copied!';
+                    setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
+                } catch (err) {
+                    alert('❌ Failed to copy');
+                }
             });
+
 
 
             document.getElementById('share-info').style.display = 'flex';
