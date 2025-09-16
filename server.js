@@ -76,9 +76,11 @@ const storage = multer.diskStorage({
     destination: uploadFolder,
     filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
+
+const maxFileSize = (process.env.MAX_FILE_SIZE_MB || 200) * 1024 * 1024;
 const upload = multer({
     storage,
-    limits: { fileSize: 1024 * 1024 * 1024 }, // optional: 1 GB per file
+    limits: { fileSize: maxFileSize },
 });
 
 // -------------------- Admin Credentials --------------------
@@ -180,8 +182,9 @@ async function uploadToDrive(filePath, originalName, parentFolderId) {
 }
 
 // -------------------- Upload Endpoint --------------------
+const maxFileCount = parseInt(process.env.MAX_FILE_COUNT) || 10;
 // SECURED: Added the validation middleware here.
-app.post("/upload", upload.array("files", 100), validateInput, async (req, res) => {
+app.post("/upload", upload.array("files", maxFileCount), validateInput, async (req, res) => {
     try {
         const { senderName, approveAll } = req.body;
         const key = generateUniqueKey();
