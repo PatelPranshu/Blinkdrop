@@ -17,6 +17,11 @@ let latestKey = null;
 let pollInterval = null;
 let simulationInterval = null; // Variable to hold our simulation timer
 
+// NEW: A variable to store the upload limits fetched from the server.
+let uploadLimits = {
+    maxFileCount: 100, // Default value
+    maxFileSizeMB: 1024 // Default value
+};
 // ===================================================================
 // Helper Functions
 // ===================================================================
@@ -63,6 +68,21 @@ function formatSize(bytes) {
  * @param {FileList} fileList The list of files to upload.
  */
 async function handleMultipleFiles(fileList) {
+    // 1. Check file count
+    if (fileList.length > uploadLimits.maxFileCount) {
+        alert(`Error: You can only upload a maximum of ${uploadLimits.maxFileCount} files at a time. You selected ${fileList.length}.`);
+        return; // Stop the upload
+    }
+
+    // 2. Check individual file sizes
+    const maxSizeBytes = uploadLimits.maxFileSizeMB * 1024 * 1024;
+    for (const file of fileList) {
+        if (file.size > maxSizeBytes) {
+            alert(`Error: The file "${file.name}" is too large.\n\nMaximum size: ${uploadLimits.maxFileSizeMB} MB.\nThis file is: ${formatSize(file.size)}.`);
+            return; // Stop the upload
+        }
+    }
+
     const senderName = senderInput.value.trim();
     if (!senderName || !isValidInput(senderName)) {
         alert("Please enter a valid name (letters, numbers, spaces).");
@@ -288,8 +308,26 @@ async function restoreSession(key) {
 // ===================================================================
 // Event Listener Setup (Main Entry Point)
 // ===================================================================
+/**
+ * NEW: Fetches the upload limits from the server when the page loads.
+ */
+async function fetchUploadLimits() {
+    try {
+        const response = await fetch('/config');
+        if (!response.ok) {
+            console.error('Could not fetch server config for upload limits.');
+            return;
+        }
+        const limits = await response.json();
+        uploadLimits = limits;
+        console.log('Upload limits configured:', uploadLimits);
+    } catch (error) {
+        console.error('Error fetching upload limits:', error);
+    }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+    fetchUploadLimits();
     // Restore name from previous session
     const name = localStorage.getItem('userName');
     if (name) senderInput.value = name;

@@ -68,6 +68,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static("public", { extensions: ["html"] }));
 app.use(express.json());
 
+
+// -------------------- Configuration Endpoint --------------------
+app.get("/config", (req, res) => {
+    res.json({
+        maxFileCount: parseInt(process.env.MAX_FILE_COUNT) || 100,
+        maxFileSizeMB: parseInt(process.env.MAX_FILE_SIZE_MB) || 1024,
+    });
+});
+
+
 // -------------------- Multer (disk storage) --------------------
 const uploadFolder = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
