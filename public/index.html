@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://pagead2.googlesyndication.com 'sha256-G2CvDOSdZeixAGRXwWiD1g5ToAVLsVfFfDsDqC7plk0=' 'sha256-VD1Hgx5t41rMsFk2/dCXRNIRedIx0DHZ7Mt8G1VbT8Q=';">
     <link rel="icon" type="image/png" href="/favicon.png">
   <title>BlinkDrop – Fast & Secure File Sharing</title>
 
@@ -139,10 +140,10 @@
     <div class="container">
         <section class="action-section">
             <h3>Get Started</h3>
-            <input type="text" id="userName" placeholder="Enter your name" />
+            <input type="text" id="userName" placeholder="Enter your name" maxlength="30" autocomplete="name"/>
             <div class="role-options">
-                <button class="role-btn" onclick="goToRole('sender')">I want to Send Files</button>
-                <button class="role-btn" onclick="goToRole('receiver')">I want to Receive Files</button>
+                <button id="senderBtn" class="role-btn">I want to Send Files</button>
+                <button id="receiverBtn" class="role-btn">I want to Receive Files</button>
             </div>
         </section>
 
@@ -151,9 +152,7 @@
      style="display:inline-block;width:728px;height:90px"
      data-ad-client="ca-pub-6476825082501261"
      data-ad-slot="5504370163"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+
                 <section class="description-section">
             <h3>How It Works</h3>
             <ol>
@@ -171,17 +170,8 @@
         <a href="/privacy-policy">Privacy & Policy</a>
     </footer>
 
-    <script>
-        function goToRole(role) {
-            const name = document.getElementById('userName').value.trim();
-            if (!name) {
-                alert("Please enter your name before selecting a role.");
-                return;
-            }
-            localStorage.setItem('userName', name);
-            window.location.href = `/${role}`;
-        }
-    </script>
+    <script src="/scripts/index.js"></script>
+    <script src="/scripts/googleads.js"></script>
 </body>
 </html>
 

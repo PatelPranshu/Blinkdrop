@@ -132,11 +132,11 @@ th {
   color: white;
 }
 
-a button, #downloadAllBtn {
+a button, .download-all-btn {
   background-color: green;
 }
 
-a button:hover, #downloadAllBtn:hover {
+a button:hover, .download-all-btn:hover {
   background-color: darkgreen;
 }
 

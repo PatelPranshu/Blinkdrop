@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net;">
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css">
@@ -12,7 +13,7 @@
   <div id="loginForm">
     <input type="text" id="adminUser" placeholder="Username">
     <input type="password" id="adminPass" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <button id="loginBtn">Login</button>
     <p id="loginError" style="color: red;"></p>
   </div>
 
@@ -21,93 +22,6 @@
     <div id="sessionTable"></div>
   </div>
 
-  <script>
-    async function login() {
-      const username = document.getElementById('adminUser').value;
-      const password = document.getElementById('adminPass').value;
-
-      const res = await fetch('/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-
-      if (res.ok) {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        loadSessions();
-        setInterval(loadSessions, 3000);
-      } else {
-        document.getElementById('loginError').innerText = 'Invalid credentials';
-      }
-    }
-
-    async function loadSessions() {
-      const res = await fetch('/admin/sessions');
-      const sessions = await res.json();
-
-      const html = `
-      <div style="text-align: right; margin-bottom: 10px;">
-        <button onclick="deleteAllUploads()" style="background-color: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 4px;">Delete All Uploads</button>
-      </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Key</th>
-              <th>Sender</th>
-              <th>Files</th>
-              <th>Receiver Waiting</th>
-              <th>Approved Receivers</th>
-              <th>Total Size</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${sessions.map(s => `
-              <tr>
-                <td>${s.key}</td>
-                <td>${s.senderName}</td>
-                <td>
-                  <ul>
-                    ${s.fileDetails.map(f => `
-                      <li>${f.name} (${(f.size / 1024).toFixed(2)} KB)
-                      </li>`).join('')}
-                  </ul>
-                </td>
-                <td>${(s.receiversWaiting || []).join(', ') || '-'}</td>
-                <td>${(s.approvedReceivers || []).join(', ') || '-'}</td>
-                <td>${(s.totalSize / 1024).toFixed(2)} KB</td>
-                <td>${new Date(s.createdAt).toLocaleString('en-IN', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  hour12: true
-                })}</td>
-
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-      document.getElementById('sessionTable').innerHTML = html;
-    }
-
-    async function deleteAllUploads() {
-      if (!confirm("Are you sure you want to delete all uploaded files?")) return;
-
-      const res = await fetch('/admin/delete-all-uploads', {
-        method: 'POST'
-      });
-
-      if (res.ok) {
-        alert("All uploads deleted.");
-        loadSessions(); // Refresh table
-      } else {
-        alert("Error deleting uploads.");
-      }
-    }
-  </script>
+  <script src="/scripts/admin.js"></script>
 </body>
 </html>

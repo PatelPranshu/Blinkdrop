@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net;">
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>BlinkDrop – Fast & Secure File Sharing</title>
@@ -36,130 +37,13 @@
      style="display:inline-block;width:728px;height:90px"
      data-ad-client="ca-pub-6476825082501261"
      data-ad-slot="5504370163"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+<script src="scripts/googleads.js"></script>
   <div id="fileSection" style="display:none;">
       <div id="fileInfo"></div>
   </div>
   </main>
 
-  <script>
-    let pollInterval = null;
-    let activeKey = null;
-    let activeReceiver = null;
-    let fileList = [];
-
-    // On page load, get the key from the URL
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const keyFromUrl = urlParams.get('key');
-
-      if (keyFromUrl) {
-        activeKey = keyFromUrl.toUpperCase();
-        document.getElementById('keyDisplay').innerText = activeKey;
-      } else {
-        document.getElementById('nameSection').innerHTML = '<p style="color:red;">No file key provided in the link. Please scan a valid QR code.</p>';
-      }
-      
-      // Pre-fill name if it exists in local storage
-      const name = localStorage.getItem('userName');
-      if (name) document.getElementById('receiverName').value = name;
-    });
-      
-    // This function is called when the user clicks "Get Files"
-    function startReceiving() {
-        const receiverName = document.getElementById('receiverName').value.trim();
-        if (!receiverName) {
-            alert("Please enter your name.");
-            return;
-        }
-
-        // Save name and set global variable
-        localStorage.setItem('userName', receiverName);
-        activeReceiver = receiverName;
-
-        // Hide the name entry section and show the file list section
-        document.getElementById('nameSection').style.display = 'none';
-        document.getElementById('fileSection').style.display = 'block';
-
-        // Start polling for file info
-        fetchAndRenderFileInfo();
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(fetchAndRenderFileInfo, 3000);
-    }
-
-    async function fetchAndRenderFileInfo() {
-      if (!activeKey || !activeReceiver) return;
-
-      const res = await fetch(`/file-info/${activeKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiverName: activeReceiver })
-      });
-
-      const container = document.getElementById('fileInfo');
-
-      if (res.ok) {
-        const data = await res.json();
-        fileList = data.files;
-
-        let html = `<p><strong>Sender:</strong> ${data.senderName}</p>`;
-        html += `<p><strong>You:</strong> ${data.receiverName}</p>`;
-
-        html += `
-          <table>
-            <thead>
-              <tr>
-                <th>File</th>
-                <th>
-                  ${data.approved ? `<button id="downloadAllBtn" onclick="downloadAll()">Download All</button>` : ''}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.files.map(f => `
-                <tr>
-                  <td>${f.name} <br><small>${formatSize(f.size)}</small></td>
-                  <td>
-                    ${data.approved
-                      ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank"><button>Download</button></a>`
-                      : `<span style="color:gray;">Waiting for approval...</span>`}
-                  </td>
-                </tr>`).join('')}
-
-            </tbody>
-          </table>
-        `;
-          const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
-          html += `<p><strong>Total Size:</strong> ${formatSize(totalSize)}</p>`;
-        container.innerHTML = html;
-      } else {
-        container.innerHTML = '<p style="color:red;">Invalid key or server error.</p>';
-        clearInterval(pollInterval);
-      }
-    }
-
-    function downloadAll() {
-      fileList.forEach(file => {
-        const link = document.createElement('a');
-        link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
-        link.download = file.name;
-        link.target = '_blank';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
-    }
-    
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    }
-
-  </script>
+    <script src="scripts/receiver-qr.js"></script>
 </body>
 </html>
 
