@@ -6,6 +6,48 @@ const fs = require("fs");
 require("dotenv").config();
 const { google } = require("googleapis");
 
+
+// ==========================================================
+// ADD THE CLEANUP CODE RIGHT HERE
+// ==========================================================
+
+// 1. Define the cleanup function
+function cleanupUploadsOnStartup() {
+    const uploadsDir = path.join(__dirname, 'uploads');
+
+    if (fs.existsSync(uploadsDir)) {
+        console.log("🧹 Cleaning up 'uploads' directory on server start...");
+        fs.readdir(uploadsDir, (err, files) => {
+            if (err) {
+                console.error("❌ Error reading uploads directory for cleanup:", err);
+                return;
+            }
+            if (files.length === 0) {
+                console.log("👍 'uploads' directory is already clean.");
+                return;
+            }
+            let deletedCount = 0;
+            files.forEach(file => {
+                fs.unlink(path.join(uploadsDir, file), unlinkErr => {
+                    if (unlinkErr) {
+                        console.error(`❌ Failed to delete orphaned file ${file}:`, unlinkErr);
+                    } else {
+                        deletedCount++;
+                    }
+                });
+            });
+            console.log(`🗑️ Deleted ${deletedCount} orphaned file(s).`);
+        });
+    }
+}
+
+// 2. Call the function to run it once on startup
+cleanupUploadsOnStartup();
+
+// ==========================================================
+
+
+
 // -------------------- Security Validation Middleware --------------------
 // This function checks all incoming data to ensure it's in the expected format.
 const validateInput = (req, res, next) => {
