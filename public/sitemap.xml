@@ -9,17 +9,17 @@
   </url>
 
   <url>
-    <loc>https://blinkdrop.app/admin-login</loc>
+    <loc>https://blinkdrop.app/receiver-scan</loc>
     <lastmod>2025-09-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
   </url>
 
   <url>
     <loc>https://blinkdrop.app/admin</loc>
     <lastmod>2025-09-12</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.1</priority>
   </url>
 
   <url>
@@ -30,10 +30,10 @@
   </url>
 
   <url>
-    <loc>https://blinkdrop.app/receiver-qr</loc>
+    <loc>https://blinkdrop.app/receiver-link</loc>
     <lastmod>2025-09-12</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.2</priority>
   </url>
 
   <url>
@@ -47,7 +47,7 @@
     <loc>https://blinkdrop.app/sender</loc>
     <lastmod>2025-09-12</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.2</priority>
   </url>
 
 </urlset>

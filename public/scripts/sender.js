@@ -144,7 +144,7 @@ async function handleMultipleFiles(fileList) {
             latestKey = data.key;
             sessionStorage.setItem('activeTransferKey', data.key);
             
-            const receiverUrl = `${window.location.origin}/receiver-qr?key=${data.key}`;
+            const receiverUrl = `${window.location.origin}/receiver-link?key=${data.key}`;
             copyLinkBtn.dataset.link = receiverUrl;
             
             document.getElementById('keyInfo').innerHTML = `Share this key: <b>${data.key}</b>`;
