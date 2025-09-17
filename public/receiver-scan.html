@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan QR Code - Blinkdrop</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #reader {
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #reader__scan_region {
+            border: 4px dashed rgba(0, 123, 255, 0.7);
+        }
+        #status-message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <a href="/" class="brand">
+            <div class="logo"><img src="favicon.png" alt="Blinkdrop Logo"></div>
+            <h1>Blinkdrop</h1>
+        </a>
+        <h2 id="page-title">Point your camera at the sender's QR code.</h2>
+    </header>
+    <main class="page-content">
+        <div id="reader"></div>
+        <div id="status-message"></div>
+        <button id="startScanBtn" class="role-btn" style="display: none; margin-top: 20px; background-color: #5cb85c;">Start Scan</button>
+    </main>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        const scannerContainer = document.getElementById('reader');
+        const statusMessage = document.getElementById('status-message');
+        const pageTitle = document.getElementById('page-title');
+        const startScanBtn = document.getElementById('startScanBtn');
+        
+        let scannerTimeout = null;
+        let html5QrcodeScanner = null;
+
+        // NEW: Function to start the scanner
+        function startScanner() {
+            // Reset the UI
+            scannerContainer.style.display = 'block';
+            startScanBtn.style.display = 'none';
+            statusMessage.innerText = '';
+            pageTitle.innerText = "Point your camera at the sender's QR code.";
+
+            // Initialize scanner if it doesn't exist
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader", 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    false
+                );
+            }
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            
+            // Start the 30-second timeout
+            scannerTimeout = setTimeout(() => {
+                stopScanner("Scanning timed out after 30 seconds.");
+            }, 30000);
+        }
+
+        // UPDATED: Function to stop the scanner
+        function stopScanner(message) {
+            if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) { // 2 = SCANNING
+                html5QrcodeScanner.clear().catch(error => console.error("Failed to clear scanner.", error));
+            }
+            clearTimeout(scannerTimeout);
+            scannerContainer.style.display = 'none';
+            pageTitle.innerText = "Scanning Stopped";
+            statusMessage.innerText = message || "Scanning stopped.";
+            startScanBtn.style.display = 'block'; // <-- Show the "Start Scan" button
+        }
+        
+        function onScanSuccess(decodedText, decodedResult) {
+            clearTimeout(scannerTimeout);
+            try {
+                const url = new URL(decodedText);
+                const key = url.searchParams.get('key');
+                if (key) {
+                    html5QrcodeScanner.clear().then(() => {
+                        window.location.href = `/receiver-qr?key=${key}`;
+                    });
+                } else {
+                    stopScanner("Invalid QR Code: No key found.");
+                }
+            } catch (e) {
+                stopScanner("Invalid URL in QR Code.");
+            }
+        }
+
+        function onScanFailure(error) {
+            // Ignore failure
+        }
+        
+        // --- Event Listeners ---
+        
+        // Start the scanner automatically when the page loads
+        startScanner();
+        
+        // Add a click listener to the new button to restart the scanner
+        startScanBtn.addEventListener('click', startScanner);
+        
+        // Listen for when the user changes tabs
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopScanner("Scanning stopped because you switched tabs.");
+            }
+        });
+    </script>
+</body>
+</html>

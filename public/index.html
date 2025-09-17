@@ -87,10 +87,19 @@
             margin-bottom: 20px;
         }
 
-        .role-options {
+        /* This new rule styles the first row of buttons */
+        .button-row {
             display: flex;
             justify-content: center;
             gap: 20px;
+            margin-bottom: 15px; /* Adds space between the two rows */
+        }
+
+        /* This modified rule stacks and centers the rows */
+        .role-options {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center;      /* Center the rows horizontally */
         }
 
         .role-btn {
@@ -142,8 +151,11 @@
             <h3>Get Started</h3>
             <input type="text" id="userName" placeholder="Enter your name" maxlength="30" autocomplete="name"/>
             <div class="role-options">
-                <button id="senderBtn" class="role-btn">I want to Send Files</button>
-                <button id="receiverBtn" class="role-btn">I want to Receive Files</button>
+                <div class="button-row">
+                    <button id="senderBtn" class="role-btn">I want to Send Files</button>
+                    <button id="receiverBtn" class="role-btn">I want to Receive Files</button>
+                </div>
+                <button id="scanBtn" class="role-btn" style="background-color: #5cb85c;">Scan QR Code</button>
             </div>
         </section>
 

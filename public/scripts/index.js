@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Find the buttons on the page by their ID.
     const senderButton = document.getElementById('senderBtn');
     const receiverButton = document.getElementById('receiverBtn');
+    const scanButton = document.getElementById('scanBtn');
 
     // 3. Attach the click event to the "Send Files" button.
     if (senderButton) {
@@ -19,6 +20,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (receiverButton) {
         receiverButton.addEventListener('click', () => {
             goToRole('receiver');
+        });
+    }
+
+     // Attach the click event to the "Scan QR" button
+    if (scanButton) {
+        scanButton.addEventListener('click', () => {
+            // Check if the native "startQrScanner" function exists
+            if (window.Android && typeof window.Android.startQrScanner === 'function') {
+                // If we are in the app, call the new native scanner directly
+                window.Android.startQrScanner();
+            } else {
+                // If we are in a regular web browser, go to the web scanner page
+                window.location.href = '/receiver-scan';
+            }
         });
     }
 });
@@ -51,6 +66,15 @@ function goToRole(role) {
     }
 
     localStorage.setItem('userName', name);
-    window.location.href = `/${role}`;
+
+    // **THIS IS THE NEW NAVIGATION LOGIC**
+    // Check if the "Android" bridge object exists in the JavaScript world
+    if (window.Android && typeof window.Android.navigate === 'function') {
+        // If it exists, we are inside the app. Use the bridge to navigate.
+        window.Android.navigate('/' + role);
+    } else {
+        // If not, we are in a normal browser. Use standard web navigation.
+        window.location.href = window.location.origin + '/' + role;
+    }
 }
 

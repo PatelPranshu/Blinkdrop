@@ -351,17 +351,32 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.reload(); // Easiest way to reset the page
     });
 
-    copyLinkBtn.addEventListener('click', async () => {
-        const link = copyLinkBtn.dataset.link;
-        if (!link) return;
+    // In public/scripts/sender.js
+
+copyLinkBtn.addEventListener('click', async () => {
+    console.log("Copy button clicked."); // BREADCRUMB #1
+    const link = copyLinkBtn.dataset.link;
+
+    if (!link) {
+        console.log("Error: No link found in dataset.");
+        return;
+    }
+
+    if (window.Android && typeof window.Android.copyToClipboard === 'function') {
+        console.log("Android bridge FOUND. Calling native copyToClipboard..."); // BREADCRUMB #2
+        window.Android.copyToClipboard(link);
+    } else {
+        console.log("Android bridge NOT FOUND. Falling back to web API."); // BREADCRUMB #3
         try {
             await navigator.clipboard.writeText(link);
             copyLinkBtn.textContent = 'Copied!';
             setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
         } catch (err) {
+            console.log("Web API navigator.clipboard failed.", err); // BREADCRUMB #4
             alert('❌ Failed to copy link.');
         }
-    });
+    }
+});
 
     // Event Delegation for "Approve" buttons
     pendingRequestsDiv.addEventListener('click', (event) => {
