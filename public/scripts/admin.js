@@ -62,7 +62,7 @@ async function loadSessions() {
                 <td>${escapeHTML(s.senderName)}</td>
                 <td>
                     <ul>
-                        ${s.fileDetails.map(f => `<li>${escapeHTML(f.name)} (${(f.size / 1024).toFixed(2)} KB)</li>`).join('')}
+                        ${s.fileDetails.map(f => `<li>${escapeHTML(f.originalName)} (${(f.size / 1024).toFixed(2)} KB)</li>`).join('')}
                     </ul>
                 </td>
                 <td>${escapeHTML((s.receiversWaiting || []).join(', ')) || '-'}</td>

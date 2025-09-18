@@ -17,6 +17,7 @@ Thumbs.db
 temp/
 uploads/
 public/uploads/
+/public/style.css
 
 # VS Code settings
 .vscode/

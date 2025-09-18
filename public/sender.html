@@ -1,75 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net https://cdn.tailwindcss.com 'sha256-G2CvDOSdZeixAGRXwWiD1g5ToAVLsVfFfDsDqC7plk0=';">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="/favicon.png">
-    <title>BlinkDrop – Fast & Secure File Sharing</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>BlinkDrop – Send Files</title>
+    <link href="/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-    <style>
-        #uploading div { margin: 8px 0; }
-        progress { width: 100%; height: 16px; }
-        .checkbox-wrapper { 
-            margin-bottom: 15px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
-    </style>
 </head>
-<body>
 
-    <header class="app-header">
-        <a href="/" class="brand">
-            <div class="logo">
-            <img src="favicon.png" alt="Blinkdrop Logo">
+<body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <div class="h-16 flex items-center justify-between">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm">
+                        <img src="/favicon.png" alt="BlinkDrop logo" class="h-5 w-5">
+                    </div>
+                    <span class="text-lg font-semibold tracking-tight">BlinkDrop</span>
+                </a>
+                <p class="hidden sm:block text-sm text-neutral-600">Simple, secure, and instant file sharing</p>
             </div>
-            <h1>Blinkdrop</h1>
-        </a>
-        <h2>Simple, Secure, and Instant File Sharing.</h2>
+        </div>
     </header>
 
-    <main class="page-content">
+    <main class="relative flex-grow">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm mt-8">
+                <div class="p-6 sm:p-10 max-w-2xl mx-auto text-center">
+                    
+                    <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">Send Files</h2>
+                    <p class="mt-2 text-base text-neutral-600">Select files to generate a secure sharing key.</p>
+                    
+                    <div class="mt-6 space-y-4">
+                        <input id="senderName" type="text" placeholder="Enter your name" readonly class="w-full rounded-lg border border-neutral-300 bg-neutral-100 px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/80 focus:border-neutral-900/80 text-sm cursor-not-allowed">
 
+                        <div id="approveAllWrapper" class="flex items-center justify-center gap-2">
+                            <input id="approveAll" name="approveAll" type="checkbox" class="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900">
+                            <label for="approveAll" class="text-sm text-neutral-600">Allow anyone with the key to download</label>
+                        </div>
 
-    <h2>Send Files</h2>
+                        <div id="drop-zone" class="w-full cursor-pointer rounded-xl border-2 border-dashed border-neutral-300 bg-white p-8 text-center hover:border-neutral-400 transition">
+                            <p class="text-neutral-600 font-medium">Drag & Drop files here</p>
+                            <p class="text-sm text-neutral-500 mt-1">or click to select</p>
+                        </div>
+                        <input type="file" id="fileInput" multiple class="hidden">
 
-    <input type="text" id="senderName" placeholder="Enter your name" readonly />
+                        <div id="uploading" style="display:none;" class="w-full text-left space-y-4 pt-2"></div>
 
-    <div class="checkbox-wrapper" id="approveAllWrapper">
-        <input type="checkbox" id="approveAll" name="approveAll" style="margin-right: 8px;">
-        <label for="approveAll">Allow anyone with the key to download</label>
-    </div>
+                        <div id="share-info" style="display: none;" class="text-center rounded-xl border border-neutral-200 bg-white p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="flex flex-col items-center md:items-start">
+                                <p id="keyInfo" class="text-base text-neutral-800"></p>
+                                <p class="text-xs text-neutral-500 mt-1">Share this key or link with the recipient.</p>
+                            </div>
+                            <div id="qrcode" class="p-1.5 bg-white border rounded-md"></div>
+                            <button id="copyLinkBtn" class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 active:scale-[0.99] transition">
+                                Copy Link
+                            </button>
+                        </div>
 
-    <div id="drop-zone">Drag & Drop or Click to Select Files</div>
-    <input type="file" id="fileInput" multiple style="display: none;" />
+                        <div id="fileTableContainer"></div>
 
-    <div id="uploading" style="display:none; margin-top:15px;"></div>
+                        <div class="pt-2">
+                             <button id="clearBtn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-900 px-4 py-2.5 text-sm font-medium border border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 active:scale-[0.99] transition">
+                                Start a New Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="approveSection" style="display: none;" class="mx-auto max-w-4xl mt-8 mb-10">
+                <div class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+                    <h3 class="text-base font-semibold tracking-tight text-neutral-900">Pending Receiver Requests</h3>
+                    <p class="text-sm text-neutral-600 mt-1">Approve users who have requested access to the files.</p>
+                    <div id="pendingRequests" class="mt-4"></div>
+                </div>
+            </section>
+        </div>
+    </main>
 
-    <div id="share-info" style="display: none;">
-    <p id="keyInfo" style="margin: 0; font-size: 1.2em;"></p>
-     <div class="divider"></div>
-    <div id="qrcode"></div>
-     <div class="divider"></div>
-    <button id="copyLinkBtn">Copy Link</button>
-    </div>
+    <footer class="border-t border-neutral-200 bg-white mt-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-xs text-neutral-500">© <span id="year"></span> BlinkDrop</p>
+            <a href="/privacy-policy" class="text-sm text-neutral-600 hover:text-neutral-900 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
+                Privacy & Policy
+            </a>
+        </div>
+    </footer>
 
-    <div id="fileTableContainer"></div>
-
-    <div style="margin-top: 1rem;">
-        <button id="clearBtn">Clear</button>
-    </div>
-
-    <div id="approveSection" style="margin-top: 2rem;">
-        <h3>Pending Receiver Requests</h3>
-        <div id="pendingRequests"></div>
-    </div>
-  </main>
-<script src="scripts/sender.js"></script>
-
+    <script src="scripts/sender.js"></script>
 </body>
 </html>
-

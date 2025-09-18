@@ -78,3 +78,9 @@ function goToRole(role) {
     }
 }
 
+// Sets the current year in the footer
+document.addEventListener('DOMContentLoaded', () => {
+  try { 
+    document.getElementById('year').textContent = new Date().getFullYear(); 
+  } catch(e) {}
+});

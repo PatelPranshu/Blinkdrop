@@ -4,47 +4,65 @@
     <meta charset="UTF-8">
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan QR Code - Blinkdrop</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Scan QR Code - BlinkDrop</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://unpkg.com;">
+    <link href="/style.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <head>
     <style>
-        main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #reader {
-            width: 90%;
-            max-width: 500px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
         #reader__scan_region {
-            border: 4px dashed rgba(0, 123, 255, 0.7);
-        }
-        #status-message {
-            margin-top: 20px;
-            font-size: 1.1em;
-            color: #d9534f;
-            font-weight: bold;
+            border: 3px dashed rgba(17, 24, 39, 0.6) !important;
         }
     </style>
 </head>
-<body>
-    <header class="app-header">
-        <a href="/" class="brand">
-            <div class="logo"><img src="favicon.png" alt="Blinkdrop Logo"></div>
-            <h1>Blinkdrop</h1>
-        </a>
-        <h2 id="page-title">Point your camera at the sender's QR code.</h2>
+</head>
+
+<body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <div class="h-16 flex items-center justify-between">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm">
+                        <img src="/favicon.png" alt="BlinkDrop logo" class="h-5 w-5">
+                    </div>
+                    <span class="text-lg font-semibold tracking-tight">BlinkDrop</span>
+                </a>
+            </div>
+        </div>
     </header>
-    <main class="page-content">
-        <div id="reader"></div>
-        <div id="status-message"></div>
-        <button id="startScanBtn" class="role-btn" style="display: none; margin-top: 20px; background-color: #5cb85c;">Start Scan</button>
+
+    <main class="relative flex-grow">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm mt-8">
+                <div class="p-6 sm:p-10 max-w-xl mx-auto text-center">
+                    
+                    <h2 id="page-title" class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">Point your camera at the QR code</h2>
+                    <p class="mt-2 text-base text-neutral-600">Scanning will begin automatically.</p>
+                    
+                    <div class="mt-8">
+                        <div id="reader" class="w-full max-w-xs sm:max-w-sm border-2 border-neutral-200 rounded-lg overflow-hidden mx-auto"></div>
+                        
+                        <div id="status-message" class="mt-5 font-semibold text-red-600 min-h-[1.25rem]"></div>
+                        
+                        <button id="startScanBtn" style="display: none;" class="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 active:scale-[0.99] transition">
+                            Start Scan Again
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 
+    <footer class="border-t border-neutral-200 bg-white mt-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-xs text-neutral-500">© <span id="year">2025</span> BlinkDrop</p>
+            <a href="/privacy-policy" class="text-sm text-neutral-600 hover:text-neutral-900 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
+                Privacy & Policy
+            </a>
+        </div>
+    </footer>
+
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="scripts/receiver-scan.js"></script>
+    <script src="/scripts/receiver-scan.js"></script>
 </body>
 </html>

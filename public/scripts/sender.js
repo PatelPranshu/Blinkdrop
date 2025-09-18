@@ -99,14 +99,19 @@ async function handleMultipleFiles(fileList) {
 
     // Create a progress bar for each file
     for (const file of fileList) {
+       // UPDATED: Progress bar HTML with Tailwind classes
         const wrapper = document.createElement("div");
         wrapper.innerHTML = `
-            <div>
-                <b>${escapeHTML(file.name)}</b>
-                (<small>${formatSize(file.size)}</small>) - 
-                <small class="upload-status" style="color: #007bff;">Uploading to server...</small>
+            <div class="text-sm">
+                <div class="flex justify-between items-center">
+                    <span class="font-medium text-neutral-800 truncate pr-4">${escapeHTML(file.name)}</span>
+                    <span class="text-neutral-500 text-xs">${formatSize(file.size)}</span>
+                </div>
+                <div class="mt-1">
+                    <progress class="progress-bar w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-neutral-200 [&::-webkit-progress-value]:bg-neutral-900 [&::-moz-progress-bar]:bg-neutral-900" value="0" max="100"></progress>
+                    <small class="upload-status text-neutral-600 block mt-0.5">Uploading to server...</small>
+                </div>
             </div>
-            <progress class="progress-bar" value="0" max="100"></progress>
         `;
         uploadingDiv.appendChild(wrapper);
     }
@@ -153,7 +158,25 @@ async function handleMultipleFiles(fileList) {
             shareInfoDiv.style.display = 'flex';
             
             const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
-            const tableHtml = `<table><thead><tr><th colspan="2">Total: ${data.files.length} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${data.files.map(f => `<tr><td>${escapeHTML(f.originalName)}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
+            const tableHtml = `
+            <div class="mt-4 border border-neutral-200 rounded-lg overflow-hidden">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-neutral-50 border-b border-neutral-200">
+                        <tr>
+                            <th scope="col" colspan="2" class="px-4 py-2 font-medium text-neutral-700">
+                                Total: ${data.files.length} files, ${formatSize(totalSize)}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200">
+                        ${data.files.map(f => `
+                        <tr class="bg-white">
+                            <td class="px-4 py-2.5 font-medium text-neutral-800">${escapeHTML(f.originalName)}</td>
+                            <td class="px-4 py-2.5 text-neutral-600 text-right">${formatSize(f.size)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
             fileTableContainer.innerHTML = tableHtml;
             uploadingDiv.style.display = "none";
             
@@ -222,24 +245,32 @@ async function fetchPendingReceivers() {
 
         const tableRows = allReceivers.map((r, i) => {
             const isApproved = approvedList.includes(r);
+            // UPDATED: Button classes and styles
             return `
-            <tr>
-                <td>${i + 1}</td>
-                <td><b>${escapeHTML(r)}</b></td>
-                <td>
+            <tr class="bg-white">
+                <td class="px-4 py-2.5 font-medium text-neutral-800">${escapeHTML(r)}</td>
+                <td class="px-4 py-2.5 text-right">
                     ${isApproved
-                        ? '<button disabled style="background-color:#4CAF50;color:white;">Approved</button>'
-                        : `<button class="approve-btn" data-receiver="${escapeHTML(r)}">Approve</button>`
+                        ? '<span class="inline-flex items-center justify-center rounded-md bg-green-100 text-green-800 px-3 py-1 text-xs font-medium">Approved</span>'
+                        : `<button class="approve-btn inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-neutral-800 active:scale-[0.99] transition" data-receiver="${escapeHTML(r)}">Approve</button>`
                     }
                 </td>
             </tr>`;
         }).join('');
 
+        // UPDATED: Pending requests table with Tailwind classes
         pendingRequestsDiv.innerHTML = `
-            <table border="1" cellpadding="8" cellspacing="0">
-                <thead><tr><th>No.</th><th>Receiver Name</th><th>Action</th></tr></thead>
-                <tbody>${tableRows}</tbody>
-            </table>`;
+            <div class="border border-neutral-200 rounded-lg overflow-hidden">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-neutral-50 border-b border-neutral-200">
+                        <tr>
+                            <th scope="col" class="px-4 py-2 font-medium text-neutral-700">Receiver Name</th>
+                            <th scope="col" class="px-4 py-2 font-medium text-neutral-700 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200">${tableRows}</tbody>
+                </table>
+            </div>`;
     } catch (error) {
         console.error("Error fetching pending receivers:", error);
     }
@@ -275,21 +306,50 @@ async function restoreSession(key) {
         
         const sessions = await res.json();
         const session = sessions.find(s => s.key === key);
-        if (!session) { sessionStorage.removeItem('activeTransferKey'); return; }
+        if (!session) { 
+            sessionStorage.removeItem('activeTransferKey'); 
+            return; 
+        }
 
+        // --- Start of UI updates ---
         dropZone.style.display = "none";
         document.getElementById('approveAllWrapper').style.display = 'none';
 
         const receiverUrl = `${window.location.origin}/receiver-link?key=${session.key}`;
         copyLinkBtn.dataset.link = receiverUrl;
-        document.getElementById('keyInfo').innerHTML = `Share this key: <b>${session.key}</b>`;
+        
+        // Use consistent styling for the key info
+        document.getElementById('keyInfo').innerHTML = `Your key is: <strong class="font-semibold text-neutral-900">${session.key}</strong>`;
+
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
+        new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 96, height: 96 });
         shareInfoDiv.style.display = 'flex';
 
         const totalSize = session.fileDetails.reduce((sum, f) => sum + Number(f.size), 0);
-        const tableHtml = `<table><thead><tr><th colspan="2">Total: ${session.fileDetails.length} files, ${formatSize(totalSize)}</th></tr><tr><th>File Name</th><th>Size</th></tr></thead><tbody>${session.fileDetails.map(f => `<tr><td>${escapeHTML(f.name)}</td><td>${formatSize(f.size)}</td></tr>`).join('')}</tbody></table>`;
+
+        // --- THIS IS THE CORRECTED PART ---
+        // Replaced the old unstyled table with the new styled version
+        const tableHtml = `
+        <div class="mt-4 border border-neutral-200 rounded-lg overflow-hidden">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-neutral-50 border-b border-neutral-200">
+                    <tr>
+                        <th scope="col" colspan="2" class="px-4 py-2 font-medium text-neutral-700">
+                            Total: ${session.fileDetails.length} files, ${formatSize(totalSize)}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200">
+                    ${session.fileDetails.map(f => `
+                    <tr class="bg-white">
+                        <td class="px-4 py-2.5 font-medium text-neutral-800">${escapeHTML(f.originalName)}</td>
+                        <td class="px-4 py-2.5 text-neutral-600 text-right">${formatSize(f.size)}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>`;
         fileTableContainer.innerHTML = tableHtml;
+        // --- END OF CORRECTION ---
 
         if (!session.isPublic) {
             approveSection.style.display = 'block';
@@ -387,4 +447,12 @@ copyLinkBtn.addEventListener('click', async () => {
             }
         }
     });
+});
+
+
+// Sets the current year in the footer
+document.addEventListener('DOMContentLoaded', () => {
+  try { 
+    document.getElementById('year').textContent = new Date().getFullYear(); 
+  } catch(e) {}
 });
