@@ -8,6 +8,7 @@ const maxFileCount = parseInt(process.env.MAX_FILE_COUNT) || 100;
 
 // --- Main Routes ---
 router.get("/config", transferController.getAppConfig);
+router.get("/api/apk-url", transferController.getApkUrl);
 router.post("/upload", upload.array("files", maxFileCount), validateInput, transferController.uploadFiles);
 router.post("/file-info/:key", validateInput, transferController.getFileInfo);
 router.post("/approve", validateInput, transferController.approveReceiver);

@@ -1,0 +1,35 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    const downloadLink = document.getElementById('downloadLink');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const buttonText = document.getElementById('buttonText');
+    const errorMessage = document.getElementById('errorMessage');
+    const spinner = document.getElementById('spinner');
+    const downloadIcon = document.getElementById('downloadIcon');
+
+    try {
+        const response = await fetch('/api/apk-url');
+        if (!response.ok) {
+            throw new Error('Could not fetch the download link.');
+        }
+
+        const data = await response.json();
+        const apkUrl = data.url;
+
+        if (apkUrl) {
+            downloadLink.href = apkUrl;
+            // Suggest a filename for the download
+            downloadLink.download = 'BlinkDrop.apk'; 
+            buttonText.textContent = 'Download Now';
+            downloadBtn.disabled = false;
+            spinner.style.display = 'none';
+            downloadIcon.style.display = 'inline-block';
+        } else {
+            throw new Error('Download link not available.');
+        }
+    } catch (error) {
+        console.error('Failed to get APK URL:', error);
+        buttonText.textContent = 'Download Unavailable';
+        errorMessage.textContent = 'Sorry, the download link could not be found. Please try again later.';
+        spinner.style.display = 'none';
+    }
+});

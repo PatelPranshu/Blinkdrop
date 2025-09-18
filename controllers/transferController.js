@@ -169,3 +169,32 @@ exports.deleteAllUploads = async (req, res) => {
         res.status(500).json({ error: "Failed to delete uploads" });
     }
 };
+
+
+// This is the updated function for your controller
+exports.getApkUrl = (req, res) => {
+    const googleDriveUrl = process.env.GOOGLE_DRIVE_APK_URL;
+
+    if (!googleDriveUrl) {
+        return res.status(404).json({ error: 'APK URL not configured on the server.' });
+    }
+
+    try {
+        // UPDATED: Using a more robust regular expression to find the File ID
+        const fileIdMatch = googleDriveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        
+        if (fileIdMatch && fileIdMatch[1]) {
+            const fileId = fileIdMatch[1];
+            // Construct the direct download URL
+            const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            
+            res.json({ url: directDownloadUrl });
+        } else {
+            // This error is thrown if the regex doesn't find a match
+            throw new Error('Invalid Google Drive URL format.');
+        }
+    } catch (error) {
+        console.error('Error processing APK URL:', error);
+        res.status(500).json({ error: 'Could not process the APK URL.' });
+    }
+};
