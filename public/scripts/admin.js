@@ -53,42 +53,60 @@ async function login() {
 async function loadSessions() {
     try {
         const res = await fetch('/admin/sessions');
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                window.location.reload();
+            }
+            throw new Error('Failed to fetch sessions');
+        }
         const sessions = await res.json();
         const sessionTableDiv = document.getElementById('sessionTable');
 
         const tableRows = sessions.map(s => `
-            <tr>
-                <td>${escapeHTML(s.key)}</td>
-                <td>${escapeHTML(s.senderName)}</td>
-                <td>
-                    <ul>
-                        ${s.fileDetails.map(f => `<li>${escapeHTML(f.originalName)} (${(f.size / 1024).toFixed(2)} KB)</li>`).join('')}
+            <tr class="border-b border-neutral-200 bg-white last:border-b-0">
+                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs">${escapeHTML(s.key)}</td>
+                <td class="whitespace-nowrap px-4 py-3">${escapeHTML(s.senderName)}</td>
+                <td class="px-4 py-3">
+                    <ul class="list-disc list-inside text-xs">
+                        ${s.fileDetails.map(f => `<li>${escapeHTML(f.originalName)} (${(f.size / 1024).toFixed(1)} KB)</li>`).join('')}
                     </ul>
                 </td>
-                <td>${escapeHTML((s.receiversWaiting || []).join(', ')) || '-'}</td>
-                <td>${escapeHTML((s.approvedReceivers || []).join(', ')) || '-'}</td>
-                <td>${(s.totalSize / 1024).toFixed(2)} KB</td>
-                <td>${new Date(s.createdAt).toLocaleString('en-IN')}</td>
+                <td class="px-4 py-3">${escapeHTML((s.receiversWaiting || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
+                <td class="px-4 py-3">${escapeHTML((s.approvedReceivers || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
+                <td class="whitespace-nowrap px-4 py-3">${(s.totalSize / 1024).toFixed(1)} KB</td>
+                <td class="whitespace-nowrap px-4 py-3">${new Date(s.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
             </tr>
         `).join('');
 
         const fullHtml = `
-            <div style="text-align: right; margin-bottom: 10px;">
-                <button id="deleteAllBtn" style="background-color: #d9534f;">Delete All Uploads</button>
+            <div class="flex justify-end mb-4">
+                <button id="deleteAllBtn" class="inline-flex items-center justify-center rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-red-700 active:scale-[0.99] transition">
+                    Delete All Uploads
+                </button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Key</th><th>Sender</th><th>Files</th><th>Waiting</th><th>Approved</th><th>Size</th><th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>${tableRows}</tbody>
-            </table>
+            <div class="border border-neutral-200 rounded-lg overflow-x-auto">
+                <table class="min-w-full text-sm text-left">
+                    <thead class="bg-neutral-50 text-neutral-700">
+                        <tr>
+                            <th class="px-4 py-2 font-medium">Key</th>
+                            <th class="px-4 py-2 font-medium">Sender</th>
+                            <th class="px-4 py-2 font-medium">Files</th>
+                            <th class="px-4 py-2 font-medium">Waiting</th>
+                            <th class="px-4 py-2 font-medium">Approved</th>
+                            <th class="px-4 py-2 font-medium">Size</th>
+                            <th class="px-4 py-2 font-medium">Created</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200">
+                        ${sessions.length > 0 ? tableRows : `<tr><td colspan="7" class="text-center p-8 text-neutral-500">No active transfers found.</td></tr>`}
+                    </tbody>
+                </table>
+            </div>
         `;
         sessionTableDiv.innerHTML = fullHtml;
     } catch (error) {
         console.error('Failed to load sessions:', error);
-        document.getElementById('sessionTable').innerHTML = '<p style="color:red;">Error loading session data.</p>';
+        document.getElementById('sessionTable').innerHTML = '<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">Error loading session data. Please try refreshing the page.</div>';
     }
 }
 
@@ -111,25 +129,17 @@ async function deleteAllUploads() {
     }
 }
 
-// ===================================================================
-// MOVED TO THE BOTTOM: This is the main entry point for the script.
-// It should be the last thing in the file.
-// ===================================================================
+// Main entry point for the script.
 document.addEventListener('DOMContentLoaded', () => {
     const loginButton = document.getElementById('loginBtn');
-    const sessionTable = document.getElementById('sessionTable');
-
-    // This now works because the 'login' function has been defined above.
     if (loginButton) {
         loginButton.addEventListener('click', login);
     }
 
-    // This works because the 'deleteAllUploads' function has been defined above.
-    if (sessionTable) {
-        sessionTable.addEventListener('click', (event) => {
-            if (event.target && event.target.id === 'deleteAllBtn') {
-                deleteAllUploads();
-            }
-        });
-    }
+    // Attach a general click listener to the whole document for dynamic buttons
+    document.addEventListener('click', (event) => {
+        if (event.target && event.target.id === 'deleteAllBtn') {
+            deleteAllUploads();
+        }
+    });
 });

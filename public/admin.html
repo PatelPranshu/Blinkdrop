@@ -1,27 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="robots" content="noindex">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.jsdelivr.net;">
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BlinkDrop</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
+    <link href="/style.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/favicon.png">
 </head>
-<body>
-  <h2>Admin Login</h2>
-  <div id="loginForm">
-    <input type="text" id="adminUser" placeholder="Username">
-    <input type="password" id="adminPass" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <p id="loginError" style="color: red;"></p>
-  </div>
 
-  <div id="dashboard" style="display: none;">
-    <h2>Active File Transfers</h2>
-    <div id="sessionTable"></div>
-  </div>
+<body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <div class="h-16 flex items-center justify-between">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm">
+                        <img src="/favicon.png" alt="BlinkDrop logo" class="h-5 w-5">
+                    </div>
+                    <span class="text-lg font-semibold tracking-tight">BlinkDrop</span>
+                </a>
+                <span class="text-sm font-medium">Admin Panel</span>
+            </div>
+        </div>
+    </header>
 
-  <script src="/scripts/admin.js"></script>
+    <main class="relative flex-grow py-10">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+
+            <div id="loginForm">
+                <div class="mx-auto max-w-sm">
+                    <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+                        <h2 class="text-center text-xl font-semibold tracking-tight text-neutral-900">Admin Login</h2>
+                        <div class="mt-6 space-y-4">
+                            <input type="text" id="adminUser" placeholder="Username" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/80 text-sm">
+                            <input type="password" id="adminPass" placeholder="Password" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/80 text-sm">
+                            <button id="loginBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 active:scale-[0.99] transition">
+                                Login
+                            </button>
+                            <p id="loginError" class="text-center text-sm text-red-600 min-h-[1.25rem]"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard" class="hidden">
+                <div class="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-sm">
+                    <h2 class="text-2xl font-semibold tracking-tight text-neutral-900">Active File Transfers</h2>
+                    <div id="sessionTable" class="mt-4"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-neutral-200 bg-white mt-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex items-center justify-center">
+            <p class="text-xs text-neutral-500">BlinkDrop Admin Panel</p>
+        </div>
+    </footer>
+
+    <script src="/scripts/admin.js"></script>
 </body>
 </html>
