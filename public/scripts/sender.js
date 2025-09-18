@@ -280,7 +280,7 @@ async function restoreSession(key) {
         dropZone.style.display = "none";
         document.getElementById('approveAllWrapper').style.display = 'none';
 
-        const receiverUrl = `${window.location.origin}/receiver-qr?key=${session.key}`;
+        const receiverUrl = `${window.location.origin}/receiver-link?key=${session.key}`;
         copyLinkBtn.dataset.link = receiverUrl;
         document.getElementById('keyInfo').innerHTML = `Share this key: <b>${session.key}</b>`;
         document.getElementById('qrcode').innerHTML = "";
