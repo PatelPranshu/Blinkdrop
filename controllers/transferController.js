@@ -85,7 +85,7 @@ exports.uploadFiles = async (req, res) => {
             const stats = fs.statSync(encryptedFilePath);
             const fileSizeInBytes = stats.size;
 
-            uploadedFiles.push({ id: gfile.data.id, originalName: gfile.data.name, size: fileSizeInBytes });
+            uploadedFiles.push({ id: gfile.data.id, originalName: gfile.data.name, size: f.size }); 
 
             fs.unlink(f.path, () => {});
             fs.unlink(encryptedFilePath, () => {});
@@ -196,6 +196,7 @@ exports.downloadFile = async (req, res) => {
             }
         });
         
+        res.setHeader('Content-Length', file.size); 
         res.setHeader("Content-Disposition", `attachment; filename="${file.originalName}"`);
         
         driveRes.data.pipe(transform).on('error', (err) => {
