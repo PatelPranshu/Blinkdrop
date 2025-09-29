@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" class=""> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://pagead2.googlesyndication.com https://cdn.tailwindcss.com 'sha256-G2CvDOSdZeixAGRXwWiD1g5ToAVLsVfFfDsDqC7plk0=';">
@@ -11,36 +10,42 @@
     <link href="/style.css" rel="stylesheet">
 </head>
 
-<body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200">
+<body class="bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-700">
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <div class="h-16 flex items-center justify-between">
-                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900">
-                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
                         <img src="/favicon.png" alt="BlinkDrop logo" class="h-5 w-5">
                     </div>
                     <span class="text-lg font-semibold tracking-tight">BlinkDrop</span>
                 </a>
-                <p class="hidden sm:block text-sm text-neutral-600">Simple, secure, and instant file sharing</p>
+                <div class="flex items-center gap-4">
+                    <p class="hidden sm:block text-sm text-neutral-600 dark:text-neutral-400">Simple, secure, and instant file sharing</p>
+                    <button id="theme-toggle" type="button" class="text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-200 dark:focus:ring-neutral-700 rounded-lg text-sm p-2.5">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <main class="relative flex-grow">
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
-            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm mt-8">
+            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 shadow-sm mt-8">
                 <div class="p-6 sm:p-10 max-w-xl mx-auto">
                     <div class="text-center">
-                        <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">Receive Files</h2>
-                        <p class="mt-2 text-base text-neutral-600">Enter your name and the key from the sender.</p>
+                        <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Receive Files</h2>
+                        <p class="mt-2 text-base text-neutral-600 dark:text-neutral-400">Enter your name and the key from the sender.</p>
                     </div>
                     
                     <div class="mt-6 space-y-3">
-                        <input type="text" id="receiverName" placeholder="Your name" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/80 focus:border-neutral-900/80 text-sm read-only:bg-neutral-100 read-only:cursor-not-allowed">
+                        <input type="text" id="receiverName" placeholder="Your name" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm read-only:bg-neutral-100 read-only:cursor-not-allowed dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500 dark:read-only:bg-neutral-700/50">
                         
-                        <input type="text" id="keyInput" placeholder="Enter file key" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/80 focus:border-neutral-900/80 text-sm uppercase">
+                        <input type="text" id="keyInput" placeholder="Enter file key" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm uppercase dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
                         
-                        <button id="getFilesBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 active:scale-[0.99] transition">
+                        <button id="getFilesBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
                             Get Files
                         </button>
                     </div>
@@ -50,10 +55,8 @@
             </section>
 
             <section class="mx-auto max-w-5xl mt-6">
-                <div class="rounded-xl border border-neutral-200 bg-white p-3 sm:p-4 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs text-neutral-500">Sponsored</p>
-                    </div>
+                <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-3 sm:p-4 shadow-sm">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">Sponsored</p>
                     <div class="mt-2 flex justify-center">
                         <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-6476825082501261" data-ad-slot="5504370163"></ins>
                     </div>
@@ -62,17 +65,17 @@
         </div>
     </main>
 
-    <footer class="border-t border-neutral-200 bg-white mt-12">
+    <footer class="border-t border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 mt-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-xs text-neutral-500">© <span id="year"></span> BlinkDrop</p>
-            <a href="/privacy-policy" class="text-sm text-neutral-600 hover:text-neutral-900 underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">© <span id="year"></span> BlinkDrop</p>
+            <a href="/privacy-policy" class="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
                 Privacy & Policy
             </a>
         </div>
     </footer>
 
-
     <script src="/scripts/receiver.js"></script>
     <script src="/scripts/googleads.js"></script>
+    <script src="/scripts/theme.js"></script>
 </body>
 </html>

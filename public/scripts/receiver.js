@@ -5,6 +5,7 @@ let fileList = [];
 
 // Helper function to prevent XSS attacks
 function escapeHTML(str) {
+    if (!str) return '';
     const p = document.createElement('p');
     p.textContent = str;
     return p.innerHTML;
@@ -28,7 +29,6 @@ function formatSize(bytes) {
 
 // Main function to check the key and fetch file info
 async function checkKey() {
-    // BUG FIX: Clear any previous polling loop before starting a new one.
     if (pollInterval) clearInterval(pollInterval);
 
     const keyInput = document.getElementById('keyInput');
@@ -45,7 +45,6 @@ async function checkKey() {
         return;
     }
     
-    // Save name to local storage so it can be remembered
     localStorage.setItem('userName', receiverName);
 
     activeKey = key;
@@ -57,92 +56,100 @@ async function checkKey() {
 // Fetches and renders the list of files from the server
 async function fetchAndRenderFileInfo() {
     if (!activeKey || !activeReceiver) return;
-    const res = await fetch(`/file-info/${activeKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiverName: activeReceiver })
-    });
+    
     const container = document.getElementById('fileInfo');
-    if (res.ok) {
+    try {
+        const res = await fetch(`/file-info/${activeKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverName: activeReceiver })
+        });
+        
+        if (!res.ok) {
+            throw new Error('Invalid key or network error.');
+        }
+
         const data = await res.json();
         fileList = data.files;
         const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
 
-        // UPDATED: Replaced table with a responsive card-based list
-        let html = `
-            <div class="border border-neutral-200 rounded-lg overflow-hidden">
-                <div class="bg-neutral-50 p-3 flex justify-between items-center border-b border-neutral-200">
+        // UPDATED: The entire HTML block now includes dark mode classes
+        const html = `
+            <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden bg-white dark:bg-neutral-800">
+                <div class="bg-neutral-50 dark:bg-neutral-700/50 p-3 flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700">
                     <div>
-                        <p class="text-sm font-medium text-neutral-700">Total: ${data.files.length} files</p>
-                        <p class="text-xs text-neutral-500">${formatSize(totalSize)}</p>
+                        <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Total: ${data.files.length} files</p>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400">${formatSize(totalSize)}</p>
                     </div>
                     <div>
-                        ${data.approved ? `<button id="downloadAllBtn" class="download-all-btn inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-neutral-800 active:scale-[0.99] transition">Download All</button>` : ''}
+                        ${data.approved ? `<button id="downloadAllBtn" class="download-all-btn inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-1.5 text-xs font-medium shadow-sm active:scale-[0.99] transition">Download All</button>` : ''}
                     </div>
                 </div>
 
-                <div class="divide-y divide-neutral-200">
+                <div class="divide-y divide-neutral-200 dark:divide-neutral-700">
                     ${data.files.map(f => `
                     <div class="p-3 flex justify-between items-center">
                         <div class="pr-2 overflow-hidden">
-                            <p class="font-medium text-neutral-800 text-sm truncate">${escapeHTML(f.name)}</p>
-                            <p class="text-xs text-neutral-500">${formatSize(f.size)}</p>
+                            <p class="font-medium text-neutral-800 dark:text-neutral-200 text-sm truncate">${escapeHTML(f.name)}</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-400">${formatSize(f.size)}</p>
                         </div>
                         <div class="flex-shrink-0">
-                             ${data.approved
-                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-900 px-3 py-1.5 text-xs font-medium border border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50 active:scale-[0.99] transition">
-                                     Download
-                                   </a>`
-                                : `<span class="text-neutral-500 text-xs px-2">Waiting...</span>`
+                            ${data.approved
+                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">Download</a>`
+                                : `<span class="text-neutral-500 dark:text-neutral-400 text-xs px-2">Waiting for approval...</span>`
                             }
                         </div>
                     </div>
                     `).join('')}
                 </div>
             </div>
-            <div class="text-xs text-neutral-500 mt-3 flex justify-between">
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 mt-3 flex justify-between">
                 <span><strong>Sender:</strong> ${escapeHTML(data.senderName)}</span>
                 <span><strong>You:</strong> ${escapeHTML(data.receiverName)}</span>
             </div>
         `;
         container.innerHTML = html;
-    } else {
-        container.innerHTML = '<p class="text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded-md p-3">Invalid key or an error occurred. Please check the key and try again.</p>';
+    } catch (error) {
+        container.innerHTML = '<p class="text-sm text-center text-red-600 bg-red-50 border border-red-200 dark:text-red-300 dark:bg-red-900/50 dark:border-red-700 rounded-md p-3">Invalid key or an error occurred. Please check the key and try again.</p>';
         clearInterval(pollInterval);
     }
 }
 
 // Main entry point when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Set the current year in the footer
+    try { 
+        document.getElementById('year').textContent = new Date().getFullYear(); 
+    } catch(e) {}
+
+    // 2. Get DOM elements
     const nameInput = document.getElementById('receiverName');
     const keyInput = document.getElementById('keyInput');
     const getFilesButton = document.getElementById('getFilesBtn');
     const fileInfoContainer = document.getElementById('fileInfo');
+    
+    // 3. Pre-fill name from localStorage
     const storedName = localStorage.getItem('userName');
-
-    // **THIS IS THE NEW LOGIC YOU REQUESTED**
     if (storedName) {
-        // If a name was entered on the index page, pre-fill it and make it read-only.
         nameInput.value = storedName;
         nameInput.readOnly = true;
     } else {
-        // If the user came directly to this page, make sure the input is editable.
         nameInput.readOnly = false;
     }
 
-    // Pre-fill key from URL if it exists
+    // 4. Pre-fill key from URL parameter if it exists
     const urlParams = new URLSearchParams(window.location.search);
     const keyFromUrl = urlParams.get('key');
     if (keyFromUrl) {
         keyInput.value = keyFromUrl.toUpperCase();
     }
     
-    // SECURE EVENT HANDLING: Attach click events using JavaScript
+    // 5. Attach button click listeners
     if (getFilesButton) {
         getFilesButton.addEventListener('click', checkKey);
     }
 
-    // Use event delegation for the "Download All" button since it's created dynamically
+    // 6. Use event delegation for the dynamic "Download All" button
     if (fileInfoContainer) {
         fileInfoContainer.addEventListener('click', (event) => {
             if (event.target && event.target.classList.contains('download-all-btn')) {
@@ -150,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const link = document.createElement('a');
                     link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
                     link.download = file.name;
-                    link.target = '_blank';
+                    link.target = '_blank'; // Open in new tab to allow multiple downloads
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -158,11 +165,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-});
-
-// Sets the current year in the footer
-document.addEventListener('DOMContentLoaded', () => {
-  try { 
-    document.getElementById('year').textContent = new Date().getFullYear(); 
-  } catch(e) {}
 });
