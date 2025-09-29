@@ -95,7 +95,7 @@ async function fetchAndRenderFileInfo() {
                         </div>
                         <div class="flex-shrink-0">
                             ${data.approved
-                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">Download</a>`
+                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">Download</a>`
                                 : `<span class="text-neutral-500 dark:text-neutral-400 text-xs px-2">Waiting for approval...</span>`
                             }
                         </div>
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const link = document.createElement('a');
                     link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
                     link.download = file.name;
-                    link.target = '_blank'; // Open in new tab to allow multiple downloads
+                    // The target='_blank' line was removed from here
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
