@@ -1,0 +1,19 @@
+# Allow search engines to crawl the entire site by default
+User-agent: *
+Disallow:
+
+# Block specific pages that should not appear in search results
+Disallow: /admin
+Disallow: /receiver-link
+Disallow: /receiver-scan
+Disallow: /sender
+Disallow: /download-apk
+Disallow: /terms-conditions
+Disallow: /privacy-policy
+
+# Also block temporary folders if they are ever accessible
+Disallow: /uploads/
+Disallow: /temp/
+
+# Point search engines to your sitemap
+Sitemap: https://blinkdrop.app/sitemap.xml
