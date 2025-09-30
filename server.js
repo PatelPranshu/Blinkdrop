@@ -5,6 +5,9 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const { google } = require("googleapis");
+const { Server } = require("socket.io");
+const useragent = require('useragent');
+const Activity = require('./models/activityModel');
 
 // --- Cleanup on Startup ---
 function cleanupUploadsOnStartup() {
@@ -36,6 +39,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // --- Express App Setup ---
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server); // Socket.IO is initialized here
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
@@ -47,6 +51,60 @@ app.use((req, res, next) => {
     req.oAuth2Client = oAuth2Client;
     next();
 });
+
+
+
+
+
+// --- Socket.IO for Real-time Tracking ---
+let activeUsers = {};
+
+// Helper function to calculate and emit user counts
+function emitActiveUsers() {
+    const users = Object.values(activeUsers);
+    const counts = {
+        total: users.length,
+        senders: users.filter(u => u.page.includes('sender')).length,
+        receivers: users.filter(u => u.page.includes('receiver')).length,
+    };
+    io.emit('activeUsers', { users, counts });
+}
+
+
+io.on('connection', (socket) => {
+    const agent = useragent.parse(socket.handshake.headers['user-agent']);
+    const ip = socket.handshake.address;
+
+    activeUsers[socket.id] = {
+        ip,
+        deviceName: `${agent.os.toString()} on ${agent.toAgent()}`,
+        deviceType: agent.device.toString(),
+        page: 'Unknown',
+        action: 'Connected',
+        username: 'Unknown'
+    };
+
+    socket.on('userUpdate', (data) => {
+        if (activeUsers[socket.id]) {
+            activeUsers[socket.id] = { ...activeUsers[socket.id], ...data };
+            
+            const activityLog = new Activity({
+                socketId: socket.id,
+                ...activeUsers[socket.id]
+            });
+            activityLog.save();
+        }
+        emitActiveUsers();
+    });
+
+    socket.on('disconnect', () => {
+        delete activeUsers[socket.id];
+        emitActiveUsers();
+    });
+    
+    emitActiveUsers();
+});
+
 
 // --- Routes ---
 const transferRoutes = require('./routes/transferRoutes');

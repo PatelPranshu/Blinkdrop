@@ -47,6 +47,15 @@ async function checkKey() {
     
     localStorage.setItem('userName', receiverName);
 
+    // Update socket with the user's action
+    const socket = io();
+    socket.emit('userUpdate', {
+        username: receiverName,
+        page: window.location.pathname,
+        action: `Receiving files with key ${key}`
+    });
+
+
     activeKey = key;
     activeReceiver = receiverName;
     await fetchAndRenderFileInfo();
@@ -73,7 +82,6 @@ async function fetchAndRenderFileInfo() {
         fileList = data.files;
         const totalSize = data.files.reduce((sum, f) => sum + Number(f.size), 0);
 
-        // UPDATED: The entire HTML block now includes dark mode classes
         const html = `
             <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden bg-white dark:bg-neutral-800">
                 <div class="bg-neutral-50 dark:bg-neutral-700/50 p-3 flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700">
@@ -117,18 +125,28 @@ async function fetchAndRenderFileInfo() {
 
 // Main entry point when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Set the current year in the footer
+    // --- Connect to Socket.IO and send user status ---
+    const socket = io();
+    socket.on('connect', () => {
+        const username = localStorage.getItem('userName') || 'Anonymous';
+        socket.emit('userUpdate', {
+            username,
+            page: window.location.pathname,
+            action: 'Preparing to receive files'
+        });
+    });
+
+    // --- Page Initialization ---
     try { 
         document.getElementById('year').textContent = new Date().getFullYear(); 
     } catch(e) {}
 
-    // 2. Get DOM elements
     const nameInput = document.getElementById('receiverName');
     const keyInput = document.getElementById('keyInput');
     const getFilesButton = document.getElementById('getFilesBtn');
     const fileInfoContainer = document.getElementById('fileInfo');
     
-    // 3. Pre-fill name from localStorage
+    // Pre-fill name from localStorage
     const storedName = localStorage.getItem('userName');
     if (storedName) {
         nameInput.value = storedName;
@@ -137,19 +155,19 @@ document.addEventListener("DOMContentLoaded", () => {
         nameInput.readOnly = false;
     }
 
-    // 4. Pre-fill key from URL parameter if it exists
+    // Pre-fill key from URL parameter if it exists
     const urlParams = new URLSearchParams(window.location.search);
     const keyFromUrl = urlParams.get('key');
     if (keyFromUrl) {
         keyInput.value = keyFromUrl.toUpperCase();
     }
     
-    // 5. Attach button click listeners
+    // Attach button click listeners
     if (getFilesButton) {
         getFilesButton.addEventListener('click', checkKey);
     }
 
-    // 6. Use event delegation for the dynamic "Download All" button
+    // Use event delegation for the dynamic "Download All" button
     if (fileInfoContainer) {
         fileInfoContainer.addEventListener('click', (event) => {
             if (event.target && event.target.classList.contains('download-all-btn')) {
@@ -157,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const link = document.createElement('a');
                     link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
                     link.download = file.name;
-                    // The target='_blank' line was removed from here
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);

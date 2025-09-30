@@ -1,3 +1,22 @@
+// Add this at the top of index.js, sender.js, and receiver.js
+
+const socket = io();
+
+socket.on('connect', () => {
+    const username = localStorage.getItem('userName') || 'Anonymous';
+    const page = window.location.pathname;
+    let action = 'Browsing';
+
+    if (page.includes('sender')) action = 'Sending files';
+    if (page.includes('receiver')) action = 'Receiving files';
+
+    socket.emit('userUpdate', {
+        username,
+        page,
+        action
+    });
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     // This function runs once the entire HTML page is loaded.
 

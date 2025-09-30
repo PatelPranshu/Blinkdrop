@@ -2,6 +2,7 @@ const { google } = require("googleapis");
 const fs = require("fs");
 const crypto = require("crypto");
 const Transfer = require('../models/transferModel');
+const Download = require('../models/downloadModel');
 
 // --- Helper Functions ---
 async function generateUniqueKey() {
@@ -279,5 +280,57 @@ exports.getApkUrl = (req, res) => {
     } catch (error) {
         console.error('Error processing APK URL:', error);
         res.status(500).json({ error: 'Could not process the APK URL.' });
+    }
+};
+
+
+// --- New Controller Functions for Admin Panel ---
+
+exports.searchTransfers = async (req, res) => {
+    try {
+        const { query } = req.query;
+        const searchRegex = new RegExp(query, 'i');
+
+        const transfers = await Transfer.find({
+            $or: [
+                { key: searchRegex },
+                { senderName: searchRegex },
+                { 'files.originalName': searchRegex },
+                { approvedReceivers: searchRegex },
+                { pendingReceivers: searchRegex }
+            ]
+        }).sort({ createdAt: -1 });
+
+        res.json(transfers);
+    } catch (err) {
+        res.status(500).json({ error: "Could not perform search" });
+    }
+};
+
+exports.getStats = async (req, res) => {
+    try {
+        const uploadStats = await Transfer.aggregate([
+            { $unwind: '$files' },
+            { $group: {
+                _id: null,
+                totalUploadSize: { $sum: '$files.size' },
+                totalFilesUploaded: { $sum: 1 }
+            }}
+        ]);
+
+        const downloadStats = await Download.aggregate([
+            { $group: {
+                _id: null,
+                totalDownloadSize: { $sum: '$fileSize' },
+                totalFilesDownloaded: { $sum: 1 }
+            }}
+        ]);
+
+        res.json({
+            uploads: uploadStats[0] || { totalUploadSize: 0, totalFilesUploaded: 0 },
+            downloads: downloadStats[0] || { totalDownloadSize: 0, totalFilesDownloaded: 0 }
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Could not retrieve stats" });
     }
 };

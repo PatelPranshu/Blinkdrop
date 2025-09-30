@@ -26,11 +26,6 @@ let uploadLimits = {
 // Helper & Rendering Functions
 // ===================================================================
 
-/**
- * Sanitizes a string to prevent XSS attacks.
- * @param {string} str The string to escape.
- * @returns {string} The sanitized string.
- */
 function escapeHTML(str) {
     if (!str) return '';
     const p = document.createElement('p');
@@ -38,32 +33,17 @@ function escapeHTML(str) {
     return p.innerHTML;
 }
 
-/**
- * Validates that a name contains only letters, numbers, and spaces.
- * @param {string} name The name to validate.
- * @returns {boolean} True if the name is valid.
- */
 function isValidInput(name) {
     const nameRegex = /^[A-Za-z0-9 ]+$/;
     return nameRegex.test(name);
 }
 
-/**
- * Formats a file size in bytes into a human-readable string (B, KB, MB).
- * @param {number} bytes The file size in bytes.
- * @returns {string} The formatted size string.
- */
 function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-/**
- * NEW FUNCTION: Renders the HTML table for the list of shared files.
- * @param {Array} files Array of file objects with originalName and size properties.
- * @returns {string} The complete HTML string for the file table.
- */
 function renderFileTable(files) {
     const totalSize = files.reduce((sum, f) => sum + Number(f.size), 0);
     return `
@@ -87,12 +67,6 @@ function renderFileTable(files) {
     </div>`;
 }
 
-/**
- * NEW FUNCTION: Renders the HTML table for pending and approved receivers.
- * @param {Array<string>} allReceivers - A unique list of all receiver names.
- * @param {Array<string>} approvedList - A list of approved receiver names.
- * @returns {string} The complete HTML string for the requests table.
- */
 function renderPendingRequestsTable(allReceivers, approvedList) {
     if (allReceivers.length === 0) {
         return `<p class="text-sm text-center py-4 text-neutral-500 dark:text-neutral-400">No download requests yet.</p>`;
@@ -130,11 +104,6 @@ function renderPendingRequestsTable(allReceivers, approvedList) {
 // ===================================================================
 // Core Application Logic
 // ===================================================================
-
-/**
- * Handles the file upload process with a two-stage progress bar (real then simulated).
- * @param {FileList} fileList The list of files to upload.
- */
 async function handleFileUpload(fileList) {
     if (fileList.length > uploadLimits.maxFileCount) {
         alert(`Error: You can only upload a maximum of ${uploadLimits.maxFileCount} files at a time. You selected ${fileList.length}.`);
@@ -257,9 +226,6 @@ async function handleFileUpload(fileList) {
     xhr.send(formData);
 }
 
-/**
- * Simulates the server-side upload progress for a better user experience.
- */
 function simulateServerProgress() {
     let progress = 0;
     const allProgressBar = document.querySelectorAll(".progress-bar");
@@ -276,9 +242,6 @@ function simulateServerProgress() {
     }, 500);
 }
 
-/**
- * Fetches and displays the list of receivers waiting for approval.
- */
 async function fetchPendingReceivers() {
     if (!latestKey) return;
     try {
@@ -291,7 +254,6 @@ async function fetchPendingReceivers() {
         const approvedList = session.approvedReceivers || [];
         const allReceivers = [...new Set([...pendingList, ...approvedList])];
 
-        // UPDATED: Use the new rendering function for a consistent UI
         pendingRequestsDiv.innerHTML = renderPendingRequestsTable(allReceivers, approvedList);
         
     } catch (error) {
@@ -299,11 +261,6 @@ async function fetchPendingReceivers() {
     }
 }
 
-/**
- * Sends a request to the server to approve a specific receiver.
- * @param {string} key The session key.
- * @param {string} receiverName The name of the receiver to approve.
- */
 async function approve(key, receiverName) {
     try {
         await fetch('/approve', {
@@ -317,10 +274,6 @@ async function approve(key, receiverName) {
     }
 }
 
-/**
- * Restores the sender's UI to a previously active session.
- * @param {string} key The session key to restore.
- */
 async function restoreSession(key) {
     latestKey = key;
     try {
@@ -340,13 +293,11 @@ async function restoreSession(key) {
         const receiverUrl = `${window.location.origin}/receiver-link?key=${session.key}`;
         copyLinkBtn.dataset.link = receiverUrl;
         
-        // UPDATED: Consistent text
         document.getElementById('keyInfo').innerHTML = `Share this key: <b>${session.key}</b>`;
 
         document.getElementById('qrcode').innerHTML = "";
         new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
         
-        // UPDATED: Use the new rendering function for a consistent UI
         fileTableContainer.innerHTML = renderFileTable(session.fileDetails);
         
         shareInfoDiv.style.display = 'flex';
@@ -368,10 +319,6 @@ async function restoreSession(key) {
 // ===================================================================
 // Event Listener Setup
 // ===================================================================
-
-/**
- * Fetches the upload limits from the server when the page loads.
- */
 async function fetchUploadLimits() {
     try {
         const response = await fetch('/config');
@@ -387,15 +334,34 @@ async function fetchUploadLimits() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // --- Connect to Socket.IO and send user status ---
+    const socket = io();
+    socket.on('connect', () => {
+        const username = localStorage.getItem('userName') || 'Anonymous';
+        socket.emit('userUpdate', {
+            username,
+            page: window.location.pathname,
+            action: 'Preparing to send files'
+        });
+    });
+
+    // --- Page Initialization ---
     fetchUploadLimits();
 
     const name = localStorage.getItem('userName');
-    if (name) senderInput.value = name;
+    if (name) {
+        senderInput.value = name;
+    }
 
     const activeKey = sessionStorage.getItem('activeTransferKey');
     if (activeKey) {
         restoreSession(activeKey);
     }
+
+    // --- Set up event listeners ---
+    try { 
+        document.getElementById('year').textContent = new Date().getFullYear(); 
+    } catch(e) {}
 
     dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -433,10 +399,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  try { 
-    document.getElementById('year').textContent = new Date().getFullYear(); 
-  } catch(e) {}
 });

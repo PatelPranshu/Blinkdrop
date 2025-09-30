@@ -12,6 +12,10 @@ function isValidInput(name) {
     return nameRegex.test(name);
 }
 
+
+// --- Socket.IO for real-time updates ---
+let socket;
+
 // Main login function
 async function login() {
     const usernameInput = document.getElementById('adminUser');
@@ -38,8 +42,11 @@ async function login() {
             document.getElementById('dashboard').style.display = 'block';
             errorP.innerText = '';
             
-            await loadSessions(); 
-            setInterval(loadSessions, 5000);
+            socket = io();
+            setupSocketListeners();
+            
+            await loadAllAdminData(); 
+            setInterval(loadAllAdminData, 10000); 
         } else {
             errorP.innerText = 'Invalid credentials';
         }
@@ -49,16 +56,137 @@ async function login() {
     }
 }
 
+function setupSocketListeners() {
+    socket.on('activeUsers', (data) => {
+        renderActiveUsers(data.users);
+        renderUserStats(data.counts);
+    });
+}
+
+async function loadAllAdminData() {
+    await loadSessions();
+    await loadStats();
+}
+
+function renderUserStats(counts) {
+    const totalUsersStatDiv = document.getElementById('totalUsersStat');
+    const senderUsersStatDiv = document.getElementById('senderUsersStat');
+    const receiverUsersStatDiv = document.getElementById('receiverUsersStat');
+
+    if(totalUsersStatDiv) {
+        totalUsersStatDiv.innerHTML = `
+            <h3 class="text-sm font-medium text-neutral-500">Active Users</h3>
+            <p class="text-2xl font-semibold">${counts.total}</p>
+        `;
+    }
+    if(senderUsersStatDiv) {
+        senderUsersStatDiv.innerHTML = `
+            <h3 class="text-sm font-medium text-neutral-500">Senders</h3>
+            <p class="text-2xl font-semibold">${counts.senders}</p>
+        `;
+    }
+    if(receiverUsersStatDiv) {
+        receiverUsersStatDiv.innerHTML = `
+            <h3 class="text-sm font-medium text-neutral-500">Receivers</h3>
+            <p class="text-2xl font-semibold">${counts.receivers}</p>
+        `;
+    }
+}
+
+function renderActiveUsers(users) {
+    const activeUsersTableDiv = document.getElementById('activeUsersTable');
+    if (!activeUsersTableDiv) return;
+
+    const tableRows = users.map(u => `
+        <tr class="border-b border-neutral-200 bg-white last:border-b-0">
+            <td class="px-4 py-3">${escapeHTML(u.username)}</td>
+            <td class="px-4 py-3">${escapeHTML(u.ip)}</td>
+            <td class="px-4 py-3">${escapeHTML(u.deviceName)}</td>
+            <td class="px-4 py-3">${escapeHTML(u.deviceType)}</td>
+            <td class="px-4 py-3">${escapeHTML(u.page)}</td>
+            <td class="px-4 py-3">${escapeHTML(u.action)}</td>
+        </tr>
+    `).join('');
+
+    const fullHtml = `
+        <table class="min-w-full text-sm text-left">
+            <thead class="bg-neutral-50 text-neutral-700">
+                <tr>
+                    <th class="px-4 py-2 font-medium">Username</th>
+                    <th class="px-4 py-2 font-medium">IP</th>
+                    <th class="px-4 py-2 font-medium">Device Name</th>
+                    <th class="px-4 py-2 font-medium">Device Type</th>
+                    <th class="px-4 py-2 font-medium">Page</th>
+                    <th class="px-4 py-2 font-medium">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-200">
+                ${users.length > 0 ? tableRows : `<tr><td colspan="6" class="text-center p-8 text-neutral-500">No active users.</td></tr>`}
+            </tbody>
+        </table>`;
+    activeUsersTableDiv.innerHTML = fullHtml;
+}
+
+// **UPDATED FUNCTION**
+async function loadStats() {
+    try {
+        const res = await fetch('/admin/stats');
+        const stats = await res.json();
+        const statsSection = document.getElementById('statsSection');
+        if (!statsSection) return;
+
+        // ---- FIX STARTS HERE ----
+
+        // 1. Remove any previously added file stat boxes to prevent duplication
+        const oldFileStats = statsSection.querySelectorAll('.file-stat-box');
+        oldFileStats.forEach(box => box.remove());
+
+        // 2. Create the HTML for the new file stat boxes
+        const fileStatsHtml = `
+            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500">Total Upload Size</h3>
+                <p class="text-2xl font-semibold">${(stats.uploads.totalUploadSize / (1024*1024)).toFixed(2)} MB</p>
+            </div>
+            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500">Total Files Uploaded</h3>
+                <p class="text-2xl font-semibold">${stats.uploads.totalFilesUploaded}</p>
+            </div>
+            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500">Total Download Size</h3>
+                <p class="text-2xl font-semibold">${(stats.downloads.totalDownloadSize / (1024*1024)).toFixed(2)} MB</p>
+            </div>
+            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500">Total Files Downloaded</h3>
+                <p class="text-2xl font-semibold">${stats.downloads.totalFilesDownloaded}</p>
+            </div>
+        `;
+
+        // 3. Append the new boxes directly into the grid container
+        statsSection.insertAdjacentHTML('beforeend', fileStatsHtml);
+
+        // ---- FIX ENDS HERE ----
+        
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+    }
+}
+
+
 // Loads and displays the active sessions table
 async function loadSessions() {
+    const searchInput = document.getElementById('searchInput');
+    const query = searchInput.value;
+    const url = query ? `/admin/search?query=${encodeURIComponent(query)}` : '/admin/sessions';
+    
     try {
-        const res = await fetch('/admin/sessions');
+        const res = await fetch(url);
         if (!res.ok) {
             if (res.status === 401 || res.status === 403) {
                 window.location.reload();
             }
             throw new Error('Failed to fetch sessions');
         }
+
         const sessions = await res.json();
         const sessionTableDiv = document.getElementById('sessionTable');
 
@@ -68,12 +196,12 @@ async function loadSessions() {
                 <td class="whitespace-nowrap px-4 py-3">${escapeHTML(s.senderName)}</td>
                 <td class="px-4 py-3">
                     <ul class="list-disc list-inside text-xs">
-                        ${s.fileDetails.map(f => `<li>${escapeHTML(f.originalName)} (${(f.size / 1024).toFixed(1)} KB)</li>`).join('')}
+                        ${(s.files || s.fileDetails || []).map(f => `<li>${escapeHTML(f.originalName)} (${((f.size || 0) / 1024).toFixed(1)} KB)</li>`).join('')}
                     </ul>
                 </td>
-                <td class="px-4 py-3">${escapeHTML((s.receiversWaiting || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
+                <td class="px-4 py-3">${escapeHTML((s.pendingReceivers || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
                 <td class="px-4 py-3">${escapeHTML((s.approvedReceivers || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
-                <td class="whitespace-nowrap px-4 py-3">${(s.totalSize / 1024).toFixed(1)} KB</td>
+                <td class="whitespace-nowrap px-4 py-3">${(((s.files || s.fileDetails || []).reduce((sum, f) => sum + (f.size || 0), 0)) / 1024).toFixed(1)} KB</td>
                 <td class="whitespace-nowrap px-4 py-3">${new Date(s.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
             </tr>
         `).join('');
@@ -134,6 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginButton = document.getElementById('loginBtn');
     if (loginButton) {
         loginButton.addEventListener('click', login);
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput){
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            // Debounce search to avoid too many requests
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadSessions, 500);
+        });
     }
 
     // Attach a general click listener to the whole document for dynamic buttons

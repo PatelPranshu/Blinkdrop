@@ -19,4 +19,9 @@ router.post("/admin/login", validateInput, transferController.adminLogin);
 router.get("/admin/sessions", transferController.getAdminSessions);
 router.post("/admin/delete-all-uploads", transferController.deleteAllUploads);
 
+// --- New Admin Routes (These were missing) ---
+router.get("/admin/search", transferController.searchTransfers);
+router.get("/admin/stats", transferController.getStats);
+
+
 module.exports = router;

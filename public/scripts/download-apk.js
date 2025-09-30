@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- Connect to Socket.IO and send user status ---
+    const socket = io();
+    socket.on('connect', () => {
+        const username = localStorage.getItem('userName') || 'Anonymous';
+        socket.emit('userUpdate', {
+            username,
+            page: window.location.pathname,
+            action: 'Downloading APK'
+        });
+    });
+
+    // --- Page Initialization ---
     const downloadLink = document.getElementById('downloadLink');
     const downloadBtn = document.getElementById('downloadBtn');
     const buttonText = document.getElementById('buttonText');
