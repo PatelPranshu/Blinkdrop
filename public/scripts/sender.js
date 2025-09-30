@@ -105,6 +105,8 @@ function renderPendingRequestsTable(allReceivers, approvedList) {
 // Core Application Logic
 // ===================================================================
 async function handleFileUpload(fileList) {
+    if (fileList.length === 0) return;
+
     if (fileList.length > uploadLimits.maxFileCount) {
         alert(`Error: You can only upload a maximum of ${uploadLimits.maxFileCount} files at a time. You selected ${fileList.length}.`);
         return;
@@ -123,9 +125,12 @@ async function handleFileUpload(fileList) {
         alert("Please enter a valid name (letters, numbers, spaces).");
         return;
     }
-    localStorage.setItem('userName', senderName); // Save name for next time
+    localStorage.setItem('userName', senderName);
+    
+    // **NEW**: Disable the name input field
+    senderInput.readOnly = true;
 
-    // Reset UI
+    // UI updates
     dropZone.style.display = "none";
     document.getElementById('approveAllWrapper').style.display = 'none';
     shareInfoDiv.style.display = 'none';
@@ -133,9 +138,8 @@ async function handleFileUpload(fileList) {
     uploadingDiv.innerHTML = '';
     uploadingDiv.style.display = "block";
 
-    // Create a progress bar for each file
+    // Create progress bars
     for (const file of fileList) {
-       // UPDATED: Progress bar HTML with dark mode text classes
         const wrapper = document.createElement("div");
         wrapper.innerHTML = `
             <div class="text-sm">
@@ -144,23 +148,15 @@ async function handleFileUpload(fileList) {
                     <span class="text-neutral-500 dark:text-neutral-400 text-xs">${formatSize(file.size)}</span>
                 </div>
                 <div class="mt-1">
-                    <progress
-                        class="progress-bar w-full h-2 rounded-lg
-                        [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-moz-progress-bar]:rounded-lg
-                        [&::-webkit-progress-bar]:bg-neutral-200 dark:[&::-webkit-progress-bar]:bg-neutral-700
-                        [&::-webkit-progress-value]:bg-neutral-900 dark:[&::-webkit-progress-value]:bg-neutral-300
-                        [&::-moz-progress-bar]:bg-neutral-900 dark:[&::-moz-progress-bar]:bg-neutral-300"
-                        value="0" max="100">
-                    </progress>
-                    <small class="upload-status text-neutral-600 dark:text-neutral-400 block mt-0.5">
-                        Uploading to server...
-                    </small>
+                    <progress class="progress-bar w-full h-2 rounded-lg [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-moz-progress-bar]:rounded-lg [&::-webkit-progress-bar]:bg-neutral-200 dark:[&::-webkit-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:bg-neutral-900 dark:[&::-webkit-progress-value]:bg-neutral-300 [&::-moz-progress-bar]:bg-neutral-900 dark:[&::-moz-progress-bar]:bg-neutral-300" value="0" max="100"></progress>
+                    <small class="upload-status text-neutral-600 dark:text-neutral-400 block mt-0.5">Uploading to server...</small>
                 </div>
             </div>
         `;
         uploadingDiv.appendChild(wrapper);
     }
 
+    // Prepare and send the upload request
     const formData = new FormData();
     formData.append('senderName', senderName);
     formData.append('approveAll', approveAllCheckbox.checked);
@@ -198,7 +194,6 @@ async function handleFileUpload(fileList) {
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), { text: receiverUrl, width: 128, height: 128 });
             
-            // UPDATED: Use the new rendering function for a consistent UI
             fileTableContainer.innerHTML = renderFileTable(data.files);
             
             uploadingDiv.style.display = "none";
@@ -215,6 +210,7 @@ async function handleFileUpload(fileList) {
         } else {
             alert("❌ Upload failed.");
             uploadingDiv.style.display = "none";
+            senderInput.readOnly = false; // Re-enable on failure
         }
     };
 
@@ -222,6 +218,7 @@ async function handleFileUpload(fileList) {
         clearInterval(simulationInterval);
         alert("❌ A network error occurred.");
         uploadingDiv.style.display = "none";
+        senderInput.readOnly = false; // Re-enable on failure
     };
     xhr.send(formData);
 }
@@ -286,6 +283,9 @@ async function restoreSession(key) {
             sessionStorage.removeItem('activeTransferKey'); 
             return; 
         }
+
+        // **NEW**: Disable the name input on session restore
+        senderInput.readOnly = true;
 
         dropZone.style.display = "none";
         document.getElementById('approveAllWrapper').style.display = 'none';
@@ -371,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     clearBtn.addEventListener('click', () => {
         sessionStorage.removeItem('activeTransferKey');
-        window.location.reload();
+        window.location.reload(); // This will reset the page and make the input editable again
     });
 
     copyLinkBtn.addEventListener('click', async () => {
