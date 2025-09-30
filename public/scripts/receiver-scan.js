@@ -5,84 +5,81 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {}
 
     // 2. Get DOM elements
-    const scannerContainer = document.getElementById('reader');
+    const readerElement = document.getElementById('reader');
     const statusMessage = document.getElementById('status-message');
     const pageTitle = document.getElementById('page-title');
     const pageSubtitle = document.getElementById('page-subtitle');
-    const startScanBtn = document.getElementById('startScanBtn');
-    
-    let scannerTimeout = null;
-    let html5QrcodeScanner = null;
+    const retryBtn = document.getElementById('retryBtn');
 
-    function startScanner() {
-        // Reset the UI for scanning
-        scannerContainer.style.display = 'block';
-        startScanBtn.style.display = 'none'; // Hide the button while scanning
-        statusMessage.innerText = '';
-        pageTitle.innerText = "Point your camera at the QR code";
-        pageSubtitle.innerText = "Scanning will stop automatically after 30 seconds.";
+    // Create a new scanner instance using the core Html5Qrcode class
+    const html5QrCode = new Html5Qrcode("reader");
 
-        // Initialize scanner if it doesn't exist
-        if (!html5QrcodeScanner) {
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", 
-                { 
-                    fps: 10, 
-                    qrbox: { width: 250, height: 250 },
-                },
-                false
-            );
-        }
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    const onScanSuccess = (decodedText, decodedResult) => {
+        // Stop scanning after a successful scan.
+        stopScanner();
         
-        scannerTimeout = setTimeout(() => {
-            stopScanner("Scanning timed out after 30 seconds.");
-        }, 30000);
-    }
-
-    function stopScanner(message) {
-        if (html5QrcodeScanner && html5QrcodeScanner.getState() === 2) { // 2 = SCANNING
-            html5QrcodeScanner.clear().catch(error => console.error("Failed to clear scanner.", error));
-        }
-        clearTimeout(scannerTimeout);
-        scannerContainer.style.display = 'none';
-        pageTitle.innerText = "Scanning Stopped";
-        pageSubtitle.innerText = "Click the button to try again."
-        statusMessage.innerText = message || "Scanning stopped.";
-        startScanBtn.innerText = "Start Scan Again"; // Change button text
-        startScanBtn.style.display = 'inline-flex'; // Show the button again
-    }
-    
-    function onScanSuccess(decodedText, decodedResult) {
-        clearTimeout(scannerTimeout);
         try {
             const url = new URL(decodedText);
             const key = url.searchParams.get('key');
             if (key) {
-                html5QrcodeScanner.clear().then(() => {
-                    window.location.href = `/receiver-link?key=${key}`;
-                });
+                // Redirect to the receiver link page
+                statusMessage.innerText = "QR Code detected! Redirecting...";
+                statusMessage.className = "mt-5 font-semibold text-green-600 dark:text-green-400 min-h-[1.25rem]";
+                window.location.href = `/receiver-link?key=${key}`;
             } else {
-                stopScanner("Invalid QR Code: No key found.");
+                handleError("Invalid QR Code: No key found.");
             }
         } catch (e) {
-            stopScanner("Invalid URL in QR Code.");
+            handleError("Invalid URL in QR Code.");
         }
-    }
+    };
 
-    function onScanFailure(error) {
-        // This function is called frequently, so we ignore failures to avoid console spam.
-    }
-    
-    // --- Event Listeners ---
-    
-    // UPDATED: Do not start automatically. Wait for the user to click the button.
-    startScanBtn.addEventListener('click', startScanner);
-    
-    // Listen for when the user changes tabs to conserve resources
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            stopScanner("Scanning paused because you switched tabs.");
+    const startScanner = () => {
+        // Reset UI for scanning
+        pageTitle.innerText = "Point your camera at the QR code";
+        pageSubtitle.innerText = "Scanning will start automatically.";
+        statusMessage.innerText = "";
+        retryBtn.style.display = 'none';
+        readerElement.style.display = 'block';
+
+        const config = {
+            fps: 10,
+            qrbox: { width: 350, height: 350 }
+        };
+
+        // This is the key part: .start() will automatically ask for permission
+        // and begin scanning in one step.
+        html5QrCode.start(
+            { facingMode: "environment" }, // Use the rear camera
+            config,
+            onScanSuccess
+        ).catch(error => {
+            // This will catch errors like "Permission denied"
+            handleError(`Unable to start scanner: ${error}`);
+        });
+    };
+
+    const stopScanner = () => {
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().catch(err => {
+                console.error("Failed to stop the scanner.", err);
+            });
         }
-    });
+    };
+    
+    const handleError = (message) => {
+        stopScanner();
+        readerElement.style.display = 'none';
+        pageTitle.innerText = "Scanning Failed";
+        pageSubtitle.innerText = "An error occurred. Please try again."
+        statusMessage.innerText = message;
+        statusMessage.className = "mt-5 font-semibold text-red-600 dark:text-red-400 min-h-[1.25rem]";
+        retryBtn.style.display = 'inline-flex';
+    };
+
+    // --- Event Listeners ---
+    retryBtn.addEventListener('click', startScanner);
+    
+    // Automatically start the scanner when the page loads
+    startScanner();
 });

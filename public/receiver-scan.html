@@ -42,17 +42,16 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 shadow-sm mt-8">
                 <div class="p-6 sm:p-10 max-w-xl mx-auto text-center">
-                    
-                    <h2 id="page-title" class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Scan a QR Code</h2>
-                    <p id="page-subtitle" class="mt-2 text-base text-neutral-600 dark:text-neutral-400">Click the button below to start your camera.</p>
+                    <h2 id="page-title" class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Scan QR Code</h2>
+                    <p id="page-subtitle" class="mt-2 text-base text-neutral-600 dark:text-neutral-400">Please allow camera access to begin.</p>
                     
                     <div class="mt-8">
-                        <div id="reader" style="display: none;" class="w-full max-w-xs sm:max-w-sm border-2 border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden mx-auto"></div>
+                        <div id="reader" class="w-full max-w-lg border-2 border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden mx-auto"></div>
                         
                         <div id="status-message" class="mt-5 font-semibold text-red-600 dark:text-red-400 min-h-[1.25rem]"></div>
                         
-                        <button id="startScanBtn" class="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
-                            Start Scan
+                        <button id="retryBtn" style="display: none;" class="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                            Try Again
                         </button>
                     </div>
                 </div>
@@ -65,6 +64,9 @@
             <p class="text-xs text-neutral-500 dark:text-neutral-400">© <span id="year"></span> BlinkDrop</p>
             <a href="/privacy-policy" class="text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
                 Privacy & Policy
+            </a>
+            <a href="/terms-conditions" class="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/80 rounded px-1">
+                Terms &amp; Conditions
             </a>
         </div>
     </footer>
