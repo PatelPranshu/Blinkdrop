@@ -1,6 +1,6 @@
 # Blinkdrop: Fast & Secure File Sharing
 
-![Blinkdrop Logo](public/favicon.png)
+<img src="public/favicon.png" alt="Blinkdrop Logo" width="200"/>
 
 Blinkdrop is a secure, private, and free file transfer platform that allows you to instantly share files of any size without needing to sign up. Built with privacy at its core, Blinkdrop uses end-to-end encryption to ensure your files are for your eyes only.
 
@@ -101,7 +101,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 Pranshu Patel  - pranshuvramani@gmail.com
 
-Project Link: [https://github.com/PatelPranshu/Blinkdrop](https://github.com/PatelPranshu/Blinkdrop)
-Pranshu Patel - [@your_twitter](https://twitter.com/your_twitter) - pranshuvramani@gmail.com
 
 Project Link: [https://github.com/PatelPranshu/Blinkdrop](https://github.com/PatelPranshu/Blinkdrop)
