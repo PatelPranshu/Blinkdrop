@@ -3,6 +3,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const Transfer = require('../models/transferModel');
 const Download = require('../models/downloadModel');
+const archiver = require('archiver');
 
 // --- Helper Functions ---
 async function generateUniqueKey() {
@@ -332,5 +333,96 @@ exports.getStats = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: "Could not retrieve stats" });
+    }
+};
+
+// Add this new function at the end of controllers/transferController.js
+exports.downloadAllFiles = async (req, res) => {
+    try {
+        const { key, receiverName } = req.params;
+        const transfer = await Transfer.findOne({ key });
+
+        if (!transfer) return res.status(404).send("Invalid key");
+
+        if (!transfer.isPublic && !transfer.approvedReceivers.includes(receiverName)) {
+            return res.status(403).send("Not authorized to download.");
+        }
+
+        const archive = archiver('zip', {
+            zlib: { level: 9 } // Sets the compression level.
+        });
+
+        // Good practice to catch warnings (e.g. stat failures and other non-blocking errors)
+        archive.on('warning', function(err) {
+            if (err.code === 'ENOENT') {
+                console.warn('Archiver warning: ', err);
+            } else {
+                throw err;
+            }
+        });
+
+        archive.on('error', function(err) {
+            throw err;
+        });
+
+        // Set the archive name
+        res.attachment(`${key}-files.zip`);
+
+        // Pipe archive data to the response
+        archive.pipe(res);
+
+        const drive = google.drive({ version: "v3", auth: req.oAuth2Client });
+        const encryptionKey = getKey(key);
+
+        // Loop through each file and append it to the archive
+        for (const file of transfer.files) {
+            const driveRes = await drive.files.get({ fileId: file.id, alt: "media" }, { responseType: "stream" });
+            
+            let iv;
+            let decipher;
+            let dataBuffer = Buffer.alloc(0);
+
+            const transform = new (require('stream').Transform)({
+                transform(chunk, encoding, callback) {
+                    if (!iv) {
+                        dataBuffer = Buffer.concat([dataBuffer, chunk]);
+                        if (dataBuffer.length >= 16) {
+                            iv = dataBuffer.slice(0, 16);
+                            const remainingData = dataBuffer.slice(16);
+                            dataBuffer = null;
+                            try {
+                                decipher = crypto.createDecipheriv(algorithm, encryptionKey, iv);
+                                this.push(decipher.update(remainingData));
+                            } catch (e) { return callback(e); }
+                        }
+                    } else {
+                        this.push(decipher.update(chunk));
+                    }
+                    callback();
+                },
+                flush(callback) {
+                    if (decipher) {
+                        try {
+                            this.push(decipher.final());
+                        } catch (e) { return callback(new Error("Decryption failed.")); }
+                    }
+                    callback();
+                }
+            });
+
+            const decryptedStream = driveRes.data.pipe(transform);
+
+            // Append the decrypted stream to the archive with the original file name
+            archive.append(decryptedStream, { name: file.originalName });
+        }
+
+        // Finalize the archive (this sends the response)
+        await archive.finalize();
+
+    } catch (err) {
+        console.error("❌ Zip and Download error:", err);
+        if (!res.headersSent) {
+            res.status(500).send("Failed to create and download zip file.");
+        }
     }
 };

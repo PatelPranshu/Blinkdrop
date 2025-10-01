@@ -2,6 +2,7 @@ let pollInterval = null;
 let activeKey = null;
 let activeReceiver = null;
 let fileList = [];
+let downloadedFileIndexes = new Set(); 
 
 // Helper function to prevent XSS attacks
 function escapeHTML(str) {
@@ -28,7 +29,7 @@ function formatSize(bytes) {
 }
 
 // Main function to check the key and fetch file info
-async function checkKey() {
+async function checkKey(socket) {
     if (pollInterval) clearInterval(pollInterval);
 
     const keyInput = document.getElementById('keyInput');
@@ -47,14 +48,12 @@ async function checkKey() {
     
     localStorage.setItem('userName', receiverName);
 
-    // Update socket with the user's action
-    const socket = io();
+    // Update socket with the user's action now that we have the key
     socket.emit('userUpdate', {
         username: receiverName,
-        page: window.location.pathname,
+        page: 'Receiver',
         action: `Receiving files with key ${key}`
     });
-
 
     activeKey = key;
     activeReceiver = receiverName;
@@ -103,7 +102,7 @@ async function fetchAndRenderFileInfo() {
                         </div>
                         <div class="flex-shrink-0">
                             ${data.approved
-                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">Download</a>`
+                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" class="download-link inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">${downloadedFileIndexes.has(f.index) ? 'Download Again' : 'Download'}</a>`
                                 : `<span class="text-neutral-500 dark:text-neutral-400 text-xs px-2">Waiting for approval...</span>`
                             }
                         </div>
@@ -125,48 +124,16 @@ async function fetchAndRenderFileInfo() {
 
 // Main entry point when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-    // --- Connect to Socket.IO and send user status ---
+    // --- Connect to Socket.IO and send initial user status ---
     const socket = io();
-        socket.on('connect', () => {
-    const username = localStorage.getItem('userName') || 'Anonymous';
-    const path = window.location.pathname;
-    let page = path;
-    let action = 'Browsing';
-
-    // Set more descriptive page names and actions
-    switch (path) {
-        case '/':
-            page = 'Home Page';
-            action = 'On main page';
-            break;
-        case '/sender':
-            page = 'Sender';
-            action = 'Preparing to send';
-            break;
-        case '/receiver':
-            page = 'Receiver';
-            action = `Preparing to receive  ${activeKey}`;
-            break;
-        case '/receiver-link':
-            page = 'Receiver Link';
-            action = `Preparing to receive  ${activeKey}`;
-            break;
-        case '/receiver-scan':
-            page = 'QR Scanner';
-            action = 'Scanning QR Code';
-            break;
-        case '/download-apk':
-            page = 'APK Download';
-            action = 'Downloading APK';
-            break;
-    }
-
-    socket.emit('userUpdate', {
-        username,
-        page, // Send the new descriptive page name
-        action
+    socket.on('connect', () => {
+        const username = localStorage.getItem('userName') || 'Anonymous';
+        socket.emit('userUpdate', {
+            username,
+            page: 'Receiver',
+            action: 'On receiver page'
+        });
     });
-});
 
     // --- Page Initialization ---
     try { 
@@ -196,21 +163,29 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Attach button click listeners
     if (getFilesButton) {
-        getFilesButton.addEventListener('click', checkKey);
+        getFilesButton.addEventListener('click', () => {
+            // Pass the socket instance to checkKey so it can update the status
+            checkKey(socket); 
+        });
     }
 
-    // Use event delegation for the dynamic "Download All" button
+    // Use event delegation for the dynamic "Download All" and individual links
     if (fileInfoContainer) {
         fileInfoContainer.addEventListener('click', (event) => {
             if (event.target && event.target.classList.contains('download-all-btn')) {
-                fileList.forEach(file => {
-                    const link = document.createElement('a');
-                    link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
-                    link.download = file.name;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
+                window.location.href = `/download-all/${activeKey}/${activeReceiver}`;
+            }
+
+            if (event.target && event.target.classList.contains('download-link')) {
+                const link = event.target;
+                // Extract the file index from the download URL
+                const fileIndex = parseInt(link.href.split('/')[5]);
+                
+                // Add the index to our set and change the text
+                if (!isNaN(fileIndex)) {
+                    downloadedFileIndexes.add(fileIndex);
+                    link.textContent = 'Download Again';
+                }
             }
         });
     }

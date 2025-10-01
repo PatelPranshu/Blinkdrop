@@ -2,6 +2,7 @@ let pollInterval = null;
 let activeKey = null;
 let activeReceiver = null;
 let fileList = [];
+let downloadedFileIndexes = new Set(); // To track clicked download links
 
 // Helper function to prevent XSS attacks
 function escapeHTML(str) {
@@ -25,7 +26,7 @@ function formatSize(bytes) {
 }
 
 // Main function to check the key and fetch file info
-async function showFiles() {
+async function showFiles(socket) {
     const nameInput = document.getElementById('receiverName');
     const receiverName = nameInput.value.trim();
 
@@ -37,48 +38,12 @@ async function showFiles() {
     localStorage.setItem('userName', receiverName);
     activeReceiver = receiverName;
 
-    // Update socket with user's action
-    const socket = io();
-    socket.on('connect', () => {
-    const username = localStorage.getItem('userName') || 'Anonymous';
-    const path = window.location.pathname;
-    let page = path;
-    let action = 'Browsing';
-
-    // Set more descriptive page names and actions
-    switch (path) {
-        case '/':
-            page = 'Home Page';
-            action = 'On main page';
-            break;
-        case '/sender':
-            page = 'Sender';
-            action = 'Preparing to send';
-            break;
-        case '/receiver':
-            page = 'Receiver';
-            action = `Preparing to receive  ${activeKey}`;
-            break;
-        case '/receiver-link':
-            page = 'Receiver Link';
-            action = `Preparing to receive  ${activeKey}`;
-            break;
-        case '/receiver-scan':
-            page = 'QR Scanner';
-            action = 'Scanning QR Code';
-            break;
-        case '/download-apk':
-            page = 'APK Download';
-            action = 'Downloading APK';
-            break;
-    }
-
+    // Update socket with the user's action now that we have the name and key
     socket.emit('userUpdate', {
-        username,
-        page, // Send the new descriptive page name
-        action
+        username: receiverName,
+        page: 'Receiver Link',
+        action: `Viewing files with key ${activeKey}`
     });
-});
 
     // Hide the name entry form and show the file list section
     document.getElementById('nameSection').style.display = 'none';
@@ -128,7 +93,7 @@ async function fetchAndRenderFileInfo() {
                         </div>
                         <div class="flex-shrink-0">
                             ${data.approved
-                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">Download</a>`
+                                ? `<a href="/download/${activeKey}/${f.index}/${activeReceiver}" class="download-link inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-3 py-1.5 text-xs font-medium active:scale-[0.99] transition">${downloadedFileIndexes.has(f.index) ? 'Download Again' : 'Download'}</a>`
                                 : `<span class="text-neutral-500 dark:text-neutral-400 text-xs px-2">Waiting for approval...</span>`
                             }
                         </div>
@@ -150,14 +115,14 @@ async function fetchAndRenderFileInfo() {
 
 // Main entry point when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-    // --- Connect to Socket.IO and send user status ---
+    // --- Connect to Socket.IO and send initial user status ---
     const socket = io();
     socket.on('connect', () => {
         const username = localStorage.getItem('userName') || 'Anonymous';
         socket.emit('userUpdate', {
             username,
-            page: window.location.pathname,
-            action: 'Preparing to receive from link'
+            page: 'Receiver Link',
+            action: 'On receiver link page'
         });
     });
 
@@ -186,21 +151,27 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const getFilesButton = document.getElementById('getFilesBtn');
     if (getFilesButton) {
-        getFilesButton.addEventListener('click', showFiles);
+        getFilesButton.addEventListener('click', () => {
+            // Pass the socket instance to showFiles so it can update the status
+            showFiles(socket);
+        });
     }
 
     const fileInfoContainer = document.getElementById('fileInfo');
     if (fileInfoContainer) {
         fileInfoContainer.addEventListener('click', (event) => {
             if (event.target && event.target.classList.contains('download-all-btn')) {
-                fileList.forEach(file => {
-                    const link = document.createElement('a');
-                    link.href = `/download/${activeKey}/${file.index}/${activeReceiver}`;
-                    link.download = file.name;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
+                window.location.href = `/download-all/${activeKey}/${activeReceiver}`;
+            }
+
+            if (event.target && event.target.classList.contains('download-link')) {
+                const link = event.target;
+                const fileIndex = parseInt(link.href.split('/')[5]);
+                
+                if (!isNaN(fileIndex)) {
+                    downloadedFileIndexes.add(fileIndex);
+                    link.textContent = 'Download Again';
+                }
             }
         });
     }

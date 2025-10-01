@@ -13,6 +13,7 @@ router.post("/upload", upload.array("files", maxFileCount), validateInput, trans
 router.post("/file-info/:key", validateInput, transferController.getFileInfo);
 router.post("/approve", validateInput, transferController.approveReceiver);
 router.get("/download/:key/:index/:receiverName", validateInput, transferController.downloadFile);
+router.get("/download-all/:key/:receiverName", validateInput, transferController.downloadAllFiles);
 
 // --- Admin Routes ---
 router.post("/admin/login", validateInput, transferController.adminLogin);
