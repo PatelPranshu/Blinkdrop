@@ -75,8 +75,9 @@ function emitActiveUsers() {
 io.on('connection', (socket) => {
     const agent = useragent.parse(socket.handshake.headers['user-agent']);
     
-    // <-- FIX #2: Correctly get the IP address from behind a proxy
-    const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+    // Correctly get the IP address from behind a proxy
+    const forwardedFor = socket.handshake.headers['x-forwarded-for'];
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : socket.handshake.address;
 
     activeUsers[socket.id] = {
         ip,

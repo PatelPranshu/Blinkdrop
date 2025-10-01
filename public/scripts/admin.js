@@ -206,7 +206,7 @@ async function loadSessions() {
                 <td class="whitespace-nowrap px-4 py-3 font-mono text-xs">${escapeHTML(s.key)}</td>
                 <td class="whitespace-nowrap px-4 py-3">${escapeHTML(s.senderName)}</td>
                 <td class="px-4 py-3">
-                    <ul class="list-disc list-inside text-xs">
+                    <ul class="list-decimal list-inside text-xs">
                         ${(s.files || s.fileDetails || []).map(f => `<li>${escapeHTML(f.originalName)} (${((f.size || 0) / 1024).toFixed(1)} KB)</li>`).join('')}
                     </ul>
                 </td>
