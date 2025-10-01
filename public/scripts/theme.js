@@ -41,3 +41,17 @@ if (themeToggleBtn) {
 
 // Invoke theme check on initial load
 themeCheck();
+
+
+document.addEventListener('DOMContentLoaded', () => {
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const openIcon = document.getElementById('menu-open-icon');
+        const closedIcon = document.getElementById('menu-closed-icon');
+
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            openIcon.classList.toggle('hidden');
+            closedIcon.classList.toggle('hidden');
+        });
+    });

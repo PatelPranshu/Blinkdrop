@@ -40,6 +40,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server); // Socket.IO is initialized here
+app.set('trust proxy', 1); // <-- FIX #1: Trust the first proxy (like Render's)
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
@@ -73,7 +74,9 @@ function emitActiveUsers() {
 
 io.on('connection', (socket) => {
     const agent = useragent.parse(socket.handshake.headers['user-agent']);
-    const ip = socket.handshake.address;
+    
+    // <-- FIX #2: Correctly get the IP address from behind a proxy
+    const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
 
     activeUsers[socket.id] = {
         ip,

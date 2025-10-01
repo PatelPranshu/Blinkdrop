@@ -2,13 +2,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Connect to Socket.IO and send user status ---
     const socket = io();
     socket.on('connect', () => {
-        const username = localStorage.getItem('userName') || 'Anonymous';
-        socket.emit('userUpdate', {
-            username,
-            page: window.location.pathname,
-            action: 'Downloading APK'
-        });
+    const username = localStorage.getItem('userName') || 'Anonymous';
+    const path = window.location.pathname;
+    let page = path;
+    let action = 'Browsing';
+
+    // Set more descriptive page names and actions
+    switch (path) {
+        case '/':
+            page = 'Home Page';
+            action = 'On main page';
+            break;
+        case '/sender':
+            page = 'Sender';
+            action = 'Preparing to send';
+            break;
+        case '/receiver':
+            page = 'Receiver';
+            action = 'Preparing to receive';
+            break;
+        case '/receiver-link':
+            page = 'Receiver Link';
+            action = 'Viewing files';
+            break;
+        case '/receiver-scan':
+            page = 'QR Scanner';
+            action = 'Scanning QR Code';
+            break;
+        case '/download-apk':
+            page = 'APK Download';
+            action = 'Downloading APK';
+            break;
+    }
+
+    socket.emit('userUpdate', {
+        username,
+        page, // Send the new descriptive page name
+        action
     });
+});
 
     // --- Page Initialization ---
     const downloadLink = document.getElementById('downloadLink');

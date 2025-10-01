@@ -43,6 +43,17 @@ async function login() {
             errorP.innerText = '';
             
             socket = io();
+
+            // Announce the admin's status upon connection
+            socket.on('connect', () => {
+                socket.emit('userUpdate', {
+                    username: usernameInput.value, // Use the name from the login form
+                    page: 'Admin Panel',
+                    action: 'Monitoring'
+                });
+            });
+
+            
             setupSocketListeners();
             
             await loadAllAdminData(); 

@@ -39,11 +39,46 @@ async function showFiles() {
 
     // Update socket with user's action
     const socket = io();
+    socket.on('connect', () => {
+    const username = localStorage.getItem('userName') || 'Anonymous';
+    const path = window.location.pathname;
+    let page = path;
+    let action = 'Browsing';
+
+    // Set more descriptive page names and actions
+    switch (path) {
+        case '/':
+            page = 'Home Page';
+            action = 'On main page';
+            break;
+        case '/sender':
+            page = 'Sender';
+            action = 'Preparing to send';
+            break;
+        case '/receiver':
+            page = 'Receiver';
+            action = `Preparing to receive  ${activeKey}`;
+            break;
+        case '/receiver-link':
+            page = 'Receiver Link';
+            action = `Preparing to receive  ${activeKey}`;
+            break;
+        case '/receiver-scan':
+            page = 'QR Scanner';
+            action = 'Scanning QR Code';
+            break;
+        case '/download-apk':
+            page = 'APK Download';
+            action = 'Downloading APK';
+            break;
+    }
+
     socket.emit('userUpdate', {
-        username: receiverName,
-        page: window.location.pathname,
-        action: `Receiving files from link with key ${activeKey}`
+        username,
+        page, // Send the new descriptive page name
+        action
     });
+});
 
     // Hide the name entry form and show the file list section
     document.getElementById('nameSection').style.display = 'none';

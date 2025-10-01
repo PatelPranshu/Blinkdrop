@@ -1,99 +1,87 @@
 <!DOCTYPE html>
-<html lang="en" class=""> 
-    <head>
+<html lang="en" class="">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.socket.io ">
-    <meta name="robots" content="noindex">
+    <title>Blinkdrop Blog – Articles on File Sharing & Security</title>
+    <meta name="description" content="Explore articles and tips from the Blinkdrop team on secure file sharing, data privacy, and getting the most out of our platform.">
     <link rel="icon" type="image/png" href="/favicon.png">
-    <title>Blinkdrop – Receive Files</title>
     <link href="/style.css" rel="stylesheet">
-
 </head>
 
 <body class="bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-700">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6">
-                <div class="relative flex items-center justify-between h-16">
-                    <div class="flex-shrink-0">
-                        <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
-                            <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
-                                <img src="/favicon.png" alt="Blinkdrop logo" class="h-5 w-5">
-                            </div>
-                            <span class="text-lg font-semibold tracking-tight">Blinkdrop</span>
-                        </a>
+        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-700">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="relative flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
+                        <img src="/favicon.png" alt="Blinkdrop logo" class="h-5 w-5">
                     </div>
+                    <span class="text-lg font-semibold tracking-tight">Blinkdrop</span>
+                </a>
+            </div>
 
-                    <nav class="hidden md:flex md:items-center md:justify-center md:gap-6 text-sm font-medium">
-                        <a href="#features" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Features</a>
-                        <a href="/blog/blog" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Blog</a>
-                        <a href="/about" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">About</a>
-                    </nav>
+            <nav class="hidden md:flex md:items-center md:justify-center md:gap-6 text-sm font-medium">
+                <a href="/#features" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Features</a>
+                <a href="/blog/blog" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Blog</a>
+                <a href="/about" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">About</a>
+            </nav>
 
-                    <div class="flex items-center gap-2">
-                        <div class="hidden md:flex items-center gap-2">
-                            <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
-                                            Scan QR
-                            </a>
-                        </div>
-
-                        <button id="theme-toggle" type="button" class="flex-shrink-0 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-200 dark:focus:ring-neutral-700 rounded-lg text-sm p-2.5">
-                            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                        </button>
-
-                        <button id="mobile-menu-button" type="button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neutral-500">
-                            <span class="sr-only">Open main menu</span>
-                            <svg id="menu-closed-icon" class="h-6 w-6 block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-                            <svg id="menu-open-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
+            <div class="flex items-center gap-2">
+                <div class="hidden md:flex items-center gap-2">
+                    <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
+                                    Scan QR
+                    </a>
                 </div>
 
-                <div id="mobile-menu" class="hidden md:hidden absolute top-16 inset-x-0 bg-white/95 dark:bg-neutral-900/95 border-b border-neutral-200 dark:border-neutral-800 backdrop-blur-sm">
-                    <div class="px-4 pt-4 pb-6 space-y-4">
-                        <a href="/#features" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Features</a>
-                        <a href="/blog" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Blog</a>
-                        <a href="/about" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">About</a>
-                        <div class="border-t border-neutral-200 dark:border-neutral-800 pt-4 flex items-center gap-2">
-                            <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
-                                            Scan QR
-                            </a>
-                        </div>
-                    </div>
+                <button id="theme-toggle" type="button" class="flex-shrink-0 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-200 dark:focus:ring-neutral-700 rounded-lg text-sm p-2.5">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+
+                <button id="mobile-menu-button" type="button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neutral-500">
+                    <span class="sr-only">Open main menu</span>
+                    <svg id="menu-closed-icon" class="h-6 w-6 block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    <svg id="menu-open-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden absolute top-16 inset-x-0 bg-white/95 dark:bg-neutral-900/95 border-b border-neutral-200 dark:border-neutral-800 backdrop-blur-sm">
+            <div class="px-4 pt-4 pb-6 space-y-4">
+                <a href="/#features" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Features</a>
+                <a href="/blog" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Blog</a>
+                <a href="/about" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">About</a>
+                <div class="border-t border-neutral-200 dark:border-neutral-800 pt-4 flex items-center gap-2">
+                     <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
+                                    Scan QR
+                    </a>
                 </div>
             </div>
-        </header>
+        </div>
+    </div>
+</header>
 
     <main class="relative flex-grow">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6">
-            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 shadow-sm mt-8">
-                <div class="p-6 sm:p-10 max-w-xl mx-auto">
-                    
-                    <div id="nameSection" class="text-center">
-                        <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Files are ready for you</h2>
-                        <p class="mt-2 text-base text-neutral-600 dark:text-neutral-400">First, please enter your name to continue.</p>
-                        <div class="mt-4 inline-flex items-center gap-2 rounded-md bg-neutral-100 dark:bg-neutral-700/50 px-3 py-1.5 text-sm font-medium text-neutral-800 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
-                            <span>File Key:</span>
-                            <b id="keyDisplay" class="tracking-wider"></b>
-                        </div>
-                        
-                        <div class="mt-6 space-y-3">
-                            <input type="text" id="receiverName" placeholder="Your name" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
-                            <button id="getFilesBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
-                                Get Files
-                            </button>
-                        </div>
-                    </div>
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-16">
+            <div class="text-center">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">The Blinkdrop Blog</h1>
+                <p class="mt-3 text-lg text-neutral-500 dark:text-neutral-400">Insights on security, privacy, and productivity in the digital world.</p>
+            </div>
 
-                    <div id="fileSection" style="display:none;">
-                         <div id="fileInfo"></div>
+            <div class="mt-12 space-y-8">
+                <a href="/blog/how-to-securely-share-files" class="group block">
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-6 shadow-sm group-hover:shadow-md transition">
+                        <h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-100 group-hover:text-600 dark:group-hover:text-400">How to Securely Share Large Files for Free</h2>
+                        <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">In today's interconnected world, sharing files is a daily task. But when it comes to large or sensitive documents, security becomes a top priority. Learn the best practices for sharing files securely without compromising your privacy or your budget.</p>
+                        <p class="mt-4 text-sm font-medium text-700 dark:text-400">Read More &rarr;</p>
                     </div>
+                </a>
+                
                 </div>
-            </section>
-
         </div>
     </main>
 
@@ -185,8 +173,9 @@
     </div>
 </footer>
 
-    <script src="/scripts/receiver-link.js"></script>
     <script src="/scripts/theme.js"></script>
-       <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
