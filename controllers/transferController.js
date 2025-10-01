@@ -32,6 +32,7 @@ async function uploadToDrive(filePath, originalName, parentFolderId, oAuth2Clien
 
 
 // --- Encryption/Decryption Helper Functions ---
+// --- Encryption/Decryption Helper Functions ---
 const algorithm = 'aes-256-cbc';
 const salt = Buffer.from(process.env.ENCRYPTION_SALT, 'hex');
 
@@ -110,8 +111,16 @@ exports.getFileInfo = async (req, res) => {
         const transfer = await Transfer.findOne({ key });
         if (!transfer) return res.status(404).json({ message: "Key not found" });
 
-        if (receiverName !== "POLL" && !transfer.pendingReceivers.includes(receiverName) && !transfer.approvedReceivers.includes(receiverName)) {
-            transfer.pendingReceivers.push(receiverName);
+        const isKnownReceiver = transfer.pendingReceivers.includes(receiverName) || transfer.approvedReceivers.includes(receiverName);
+
+        if (receiverName !== "POLL" && !isKnownReceiver) {
+            // If the transfer is public, auto-approve the new receiver
+            if (transfer.isPublic) {
+                transfer.approvedReceivers.push(receiverName);
+            } else {
+                // Otherwise, add them to the waiting list
+                transfer.pendingReceivers.push(receiverName);
+            }
             await transfer.save();
         }
 

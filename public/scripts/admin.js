@@ -210,8 +210,8 @@ async function loadSessions() {
                         ${(s.files || s.fileDetails || []).map(f => `<li>${escapeHTML(f.originalName)} (${((f.size || 0) / 1024).toFixed(1)} KB)</li>`).join('')}
                     </ul>
                 </td>
-                <td class="px-4 py-3">${escapeHTML((s.pendingReceivers || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
-                <td class="px-4 py-3">${escapeHTML((s.approvedReceivers || []).join(', ')) || '<span class="text-neutral-400">-</span>'}</td>
+                <td class="px-4 py-3">${(s.receiversWaiting && s.receiversWaiting.length > 0) ? escapeHTML(s.receiversWaiting.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
+                <td class="px-4 py-3">${(s.approvedReceivers && s.approvedReceivers.length > 0) ? escapeHTML(s.approvedReceivers.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
                 <td class="whitespace-nowrap px-4 py-3">${(((s.files || s.fileDetails || []).reduce((sum, f) => sum + (f.size || 0), 0)) / 1024).toFixed(1)} KB</td>
                 <td class="whitespace-nowrap px-4 py-3">${new Date(s.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
             </tr>
