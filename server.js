@@ -8,6 +8,7 @@ const { google } = require("googleapis");
 const { Server } = require("socket.io");
 const useragent = require('useragent');
 const Activity = require('./models/activityModel');
+const cors = require('cors'); 
 
 // --- Cleanup on Startup ---
 function cleanupUploadsOnStartup() {
@@ -38,11 +39,12 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // --- Express App Setup ---
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server); // Socket.IO is initialized here
 app.set('trust proxy', 1); // <-- FIX #1: Trust the first proxy (like Render's)
 const PORT = process.env.PORT || 3000;
-
+console.log("APK URL from .env:", process.env.GOOGLE_DRIVE_APK_URL); 
 // --- Middleware ---
 app.use(express.static("public", { extensions: ["html"] }));
 app.use(express.json());
@@ -116,6 +118,10 @@ app.use('/', transferRoutes);
 // app.get("/auth", ...);
 // app.get("/oauth2callback", ...);
 
+// --- 404 Handler ---
+app.use((req, res, next) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
 // --- Start Server ---
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);

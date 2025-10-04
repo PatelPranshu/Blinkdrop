@@ -108,21 +108,21 @@ async function handleFileUpload(fileList) {
     if (fileList.length === 0) return;
 
     if (fileList.length > uploadLimits.maxFileCount) {
-        alert(`Error: You can only upload a maximum of ${uploadLimits.maxFileCount} files at a time. You selected ${fileList.length}.`);
+        showNotification(`Error: You can only upload a maximum of ${uploadLimits.maxFileCount} files at a time. You selected ${fileList.length}.`);
         return;
     }
 
     const maxSizeBytes = uploadLimits.maxFileSizeMB * 1024 * 1024;
     for (const file of fileList) {
         if (file.size > maxSizeBytes) {
-            alert(`Error: The file "${file.name}" is too large.\n\nMaximum size: ${uploadLimits.maxFileSizeMB} MB.\nThis file is: ${formatSize(file.size)}.`);
+            showNotification(`Error: The file "${file.name}" is too large.\n\nMaximum size: ${uploadLimits.maxFileSizeMB} MB.\nThis file is: ${formatSize(file.size)}.`);
             return;
         }
     }
 
     const senderName = senderInput.value.trim();
     if (!senderName || !isValidInput(senderName)) {
-        alert("Please enter a valid name (letters, numbers, spaces).");
+        showNotification("Please enter a valid name (letters, numbers, spaces).");
         return;
     }
     localStorage.setItem('userName', senderName);
@@ -208,7 +208,7 @@ async function handleFileUpload(fileList) {
                 pollInterval = setInterval(fetchPendingReceivers, 3000);
             }
         } else {
-            alert("❌ Upload failed.");
+            showNotification("❌ Upload failed.");
             uploadingDiv.style.display = "none";
             senderInput.readOnly = false; // Re-enable on failure
         }
@@ -216,7 +216,7 @@ async function handleFileUpload(fileList) {
 
     xhr.onerror = function () {
         clearInterval(simulationInterval);
-        alert("❌ A network error occurred.");
+        showNotification("❌ A network error occurred.");
         uploadingDiv.style.display = "none";
         senderInput.readOnly = false; // Re-enable on failure
     };
@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 copyLinkBtn.textContent = 'Copied!';
                 setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
             } catch (err) {
-                alert('❌ Failed to copy link.');
+                showNotification('❌ Failed to copy link.');
             }
         }
     });

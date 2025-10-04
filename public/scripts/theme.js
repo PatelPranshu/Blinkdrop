@@ -55,3 +55,26 @@ document.addEventListener('DOMContentLoaded', () => {
             closedIcon.classList.toggle('hidden');
         });
     });
+
+function showNotification(message, type = 'error') {
+    const container = document.getElementById('notification-container');
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    container.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // Animate out and remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        notification.addEventListener('transitionend', () => {
+            notification.remove();
+        });
+    }, 5000);
+}

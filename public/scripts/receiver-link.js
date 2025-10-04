@@ -31,7 +31,7 @@ async function showFiles(socket) {
     const receiverName = nameInput.value.trim();
 
     if (!receiverName || !isValidInput(receiverName)) {
-        alert("Please enter a valid name (letters, numbers, spaces).");
+        showNotification("Please enter a valid name (letters, numbers, spaces).");
         return;
     }
     

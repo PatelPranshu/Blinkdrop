@@ -256,14 +256,14 @@ async function deleteAllUploads() {
     try {
         const res = await fetch('/admin/delete-all-uploads', { method: 'POST' });
         if (res.ok) {
-            alert("All uploads have been deleted.");
+            showNotification("All uploads have been deleted.");
             await loadSessions(); // Refresh the table to show it's empty
         } else {
             const errorData = await res.json();
-            alert(`Error deleting uploads: ${errorData.error || 'Unknown error'}`);
+            showNotification(`Error deleting uploads: ${errorData.error || 'Unknown error'}`);
         }
     } catch (error) {
-        alert('A network error occurred while trying to delete uploads.');
+        showNotification('A network error occurred while trying to delete uploads.');
         console.error('Delete error:', error);
     }
 }

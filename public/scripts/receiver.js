@@ -38,11 +38,11 @@ async function checkKey(socket) {
     const receiverName = nameInput.value.trim();
 
     if (!key || !receiverName) {
-        alert("Enter both your name and the file key.");
+        showNotification("Enter both your name and the file key.");
         return;
     }
     if (!isValidInput(receiverName, 'name') || !isValidInput(key, 'key')) {
-        alert("Invalid format for name or key. Please use only letters and numbers.");
+        showNotification("Invalid format for name or key. Please use only letters and numbers.");
         return;
     }
     

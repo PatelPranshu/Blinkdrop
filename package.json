@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "build": "npx tailwindcss -i ./public/input.css -o ./public/style.css --minify",
+    "build": "npx tailwindcss -i ./public/input.css -o ./public/style.css",
     "dev": "nodemon server.js"
   },
   "keywords": [],
@@ -13,6 +13,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "archiver": "^5.3.1",
+    "axios": "^1.12.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -24,8 +26,7 @@
     "multer": "^2.0.2",
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1",
-    "useragent": "^2.3.0",
-    "archiver": "^5.3.1"
+    "useragent": "^2.3.0"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,4 @@
+const axios = require('axios');
 const { google } = require("googleapis");
 const fs = require("fs");
 const crypto = require("crypto");
@@ -62,11 +63,24 @@ async function encryptFile(filePath, secretKey) {
 
 // --- Controller Functions ---
 
-exports.getAppConfig = (req, res) => {
-    res.json({
-        maxFileCount: parseInt(process.env.MAX_FILE_COUNT) || 100,
-        maxFileSizeMB: parseInt(process.env.MAX_FILE_SIZE_MB) || 1024,
-    });
+exports.getApkUrl = async (req, res) => {
+    try {
+        // Fetch the latest release data from your GitHub repository
+        const response = await axios.get('https://api.github.com/repos/PatelPranshu/Blinkdrop-app/releases/latest');
+        
+        // Find the asset that is the .apk file
+        const apkAsset = response.data.assets.find(asset => asset.name.endsWith('.apk'));
+
+        if (apkAsset) {
+            // Send the direct download URL for that asset to the frontend
+            res.json({ url: apkAsset.browser_download_url });
+        } else {
+            throw new Error('No APK file found in the latest release.');
+        }
+    } catch (error) {
+        console.error('Error fetching latest release from GitHub:', error.message);
+        res.status(500).json({ error: 'Could not retrieve the download link.' });
+    }
 };
 
 exports.uploadFiles = async (req, res) => {
@@ -269,27 +283,30 @@ exports.deleteAllUploads = async (req, res) => {
 };
 
 
-exports.getApkUrl = (req, res) => {
-    const googleDriveUrl = process.env.GOOGLE_DRIVE_APK_URL;
+    exports.getAppConfig = (req, res) => {
+        res.json({
+            maxFileCount: parseInt(process.env.MAX_FILE_COUNT) || 100,
+            maxFileSizeMB: parseInt(process.env.MAX_FILE_SIZE_MB) || 1024,
+        });
+    };
 
-    if (!googleDriveUrl) {
-        return res.status(404).json({ error: 'APK URL not configured on the server.' });
-    }
-
+exports.getApkUrl = async (req, res) => {
     try {
-        const fileIdMatch = googleDriveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        // Fetch the latest release data from your GitHub repository
+        const response = await axios.get('https://api.github.com/repos/PatelPranshu/Blinkdrop-app/releases/latest');
         
-        if (fileIdMatch && fileIdMatch[1]) {
-            const fileId = fileIdMatch[1];
-            const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-            
-            res.json({ url: directDownloadUrl });
+        // Find the asset that is the .apk file
+        const apkAsset = response.data.assets.find(asset => asset.name.endsWith('.apk'));
+
+        if (apkAsset) {
+            // Send the direct download URL for that asset to the frontend
+            res.json({ url: apkAsset.browser_download_url });
         } else {
-            throw new Error('Invalid Google Drive URL format.');
+            throw new Error('No APK file found in the latest release.');
         }
     } catch (error) {
-        console.error('Error processing APK URL:', error);
-        res.status(500).json({ error: 'Could not process the APK URL.' });
+        console.error('Error fetching latest release from GitHub:', error.message);
+        res.status(500).json({ error: 'Could not retrieve the download link.' });
     }
 };
 

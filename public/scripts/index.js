@@ -102,11 +102,11 @@ function goToRole(role) {
     const name = nameInput.value.trim();
 
     if (!name) {
-        alert("Please enter your name before selecting a role.");
+        showNotification("Please enter your name before selecting a role.");
         return;
     }
     if (!isValidInput(name)) {
-        alert("Invalid name. Please use only letters, numbers, and spaces.");
+        showNotification("Invalid name. Please use only letters, numbers, and spaces.");
         return;
     }
 

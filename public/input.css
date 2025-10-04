@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add your custom notification styles here */
+#notification-container .notification {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+#notification-container .notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#notification-container .notification.error {
+    background-color: #dc2626; /* Red */
+}
+
+#notification-container .notification.success {
+    background-color: #16a34a; /* Green */
+}

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const path = window.location.pathname;
     let page = path;
     let action = 'Browsing';
+    
 
     // Set more descriptive page names and actions
     switch (path) {
@@ -42,11 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-    // --- Page Initialization ---
     const downloadLink = document.getElementById('downloadLink');
     const downloadBtn = document.getElementById('downloadBtn');
     const buttonText = document.getElementById('buttonText');
-    const errorMessage = document.getElementById('errorMessage');
     const spinner = document.getElementById('spinner');
     const downloadIcon = document.getElementById('downloadIcon');
 
@@ -61,8 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (apkUrl) {
             downloadLink.href = apkUrl;
-            // Suggest a filename for the download
-            downloadLink.download = 'BlinkDrop.apk'; 
+            downloadLink.download = 'Blinkdrop.apk'; 
             buttonText.textContent = 'Download Now';
             downloadBtn.disabled = false;
             spinner.style.display = 'none';
