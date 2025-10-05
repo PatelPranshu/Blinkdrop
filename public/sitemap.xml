@@ -50,5 +50,10 @@
     <lastmod>2025-10-01</lastmod>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://blinkdrop.app/404</loc>
+    <lastmod>2025-10-01</lastmod>
+    <priority>0.1</priority>
+  </url>
 
 </urlset>

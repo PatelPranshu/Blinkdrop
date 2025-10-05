@@ -1788,6 +1788,46 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.dark\:selection\:bg-neutral-100 *:is(.dark *)::-moz-selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:selection\:bg-neutral-100 *:is(.dark *)::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:selection\:text-black *:is(.dark *)::-moz-selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+
+.dark\:selection\:text-black *:is(.dark *)::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+
+.dark\:selection\:bg-neutral-100:is(.dark *)::-moz-selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:selection\:bg-neutral-100:is(.dark *)::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:selection\:text-black:is(.dark *)::-moz-selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+
+.dark\:selection\:text-black:is(.dark *)::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+
 .dark\:placeholder\:text-neutral-400:is(.dark *)::-moz-placeholder {
   --tw-text-opacity: 1;
   color: rgb(163 163 163 / var(--tw-text-opacity, 1));

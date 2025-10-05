@@ -16,6 +16,7 @@ Disallow: /receiver-link
 Disallow: /receiver-scan
 Disallow: /uploads/
 Disallow: /temp/
+Disallow:/404
 
 # Point to your sitemap
 Sitemap: https://blinkdrop.app/sitemap.xml
