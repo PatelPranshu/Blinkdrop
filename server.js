@@ -40,6 +40,34 @@ mongoose.connect(process.env.MONGODB_URI)
 // --- Express App Setup ---
 const app = express();
 app.use(cors());
+
+
+// Disable the 'X-Powered-By' header for security
+app.disable('x-powered-by');
+
+// Middleware to set security headers
+app.use((req, res, next) => {
+    // Tells browsers to only connect to your site via HTTPS for the next year
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    
+    // Prevents your site from being put in an <iframe> on other sites (clickjacking protection)
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    
+    // Prevents the browser from trying to guess the content type of a file
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Controls what referrer information is sent to other sites
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // Controls which browser features your site can use
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    
+    next();
+});
+
+
+
+
 const server = http.createServer(app);
 const io = new Server(server); // Socket.IO is initialized here
 app.set('trust proxy', 1); // <-- FIX #1: Trust the first proxy (like Render's)
