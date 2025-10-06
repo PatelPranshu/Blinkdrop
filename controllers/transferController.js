@@ -293,7 +293,7 @@ exports.deleteAllUploads = async (req, res) => {
 exports.getApkUrl = async (req, res) => {
     try {
         // Fetch the latest release data from your GitHub repository
-        const response = await axios.get('https://api.github.com/repos/PatelPranshu/Blinkdrop-app/releases/latest');
+        const response = await axios.get(process.env.GITHUB_APP_URL);
         
         // Find the asset that is the .apk file
         const apkAsset = response.data.assets.find(asset => asset.name.endsWith('.apk'));

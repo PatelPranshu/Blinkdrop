@@ -47,24 +47,35 @@ app.disable('x-powered-by');
 
 // Middleware to set security headers
 app.use((req, res, next) => {
-    // Tells browsers to only connect to your site via HTTPS for the next year
+    // Tells browsers to only connect to your site via HTTPS
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    
-    // Prevents your site from being put in an <iframe> on other sites (clickjacking protection)
+
+    // Prevents clickjacking
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    
-    // Prevents the browser from trying to guess the content type of a file
+
+    // Prevents MIME-sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    
-    // Controls what referrer information is sent to other sites
+
+    // Controls referrer information
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
-    // Controls which browser features your site can use
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    
+
+    // Controls browser features access
+    res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+
+    // FINAL Content Security Policy
+    res.setHeader('Content-Security-Policy', 
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://cdn.socket.io https://cdn.jsdelivr.net https://unpkg.com https://pagead2.googlesyndication.com https://ep2.adtrafficquality.google; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: https://ep1.adtrafficquality.google; " +
+        // CORRECTED: Added Google's domain for network connections
+        "connect-src 'self' https://ep1.adtrafficquality.google https://cdn.socket.io https://pagead2.googlesyndication.com; " + 
+        "frame-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep2.adtrafficquality.google https://www.google.com; " + 
+        "form-action 'self';"
+    );
+
     next();
 });
-
 
 
 
@@ -145,6 +156,23 @@ app.use('/', transferRoutes);
 // You can keep your /auth and /oauth2callback routes here as they are setup-related
 // app.get("/auth", ...);
 // app.get("/oauth2callback", ...);
+
+
+// --- Multer Error Handler ---
+const multer = require('multer');
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({ error: `You can only upload a maximum of ${process.env.MAX_FILE_COUNT || 100} files at a time.` });
+        }
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ error: `One of your files is larger than the ${process.env.MAX_FILE_SIZE_MB || 1024} MB limit.` });
+        }
+    }
+    // If it's not a Multer error, pass it on
+    next(err);
+});
+
 
 // --- 404 Handler ---
 app.use((req, res, next) => {

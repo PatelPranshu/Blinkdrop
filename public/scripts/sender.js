@@ -112,7 +112,7 @@ async function handleFileUpload(fileList) {
         return;
     }
 
-    const maxSizeBytes = uploadLimits.maxFileSizeMB * 1024 * 1024;
+  const maxSizeBytes = uploadLimits.maxFileSizeMB * 1024 * 1024;
     for (const file of fileList) {
         if (file.size > maxSizeBytes) {
             showNotification(`Error: The file "${file.name}" is too large.\n\nMaximum size: ${uploadLimits.maxFileSizeMB} MB.\nThis file is: ${formatSize(file.size)}.`);
@@ -406,19 +406,34 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.reload(); // This will reset the page and make the input editable again
     });
 
-    copyLinkBtn.addEventListener('click', async () => {
+    copyLinkBtn.addEventListener('click', () => {
         const link = copyLinkBtn.dataset.link;
         if (!link) return;
 
-        if (window.Android && typeof window.Android.copyToClipboard === 'function') {
-            window.Android.copyToClipboard(link);
+        // Use modern clipboard API if available and secure
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link).then(() => {
+                copyLinkBtn.textContent = 'Copied!';
+                setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
+            }).catch(err => {
+                showNotification('❌ Failed to copy link.');
+            });
         } else {
+            // Fallback for insecure contexts (HTTP) or older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = link;
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
             try {
-                await navigator.clipboard.writeText(link);
+                document.execCommand('copy');
                 copyLinkBtn.textContent = 'Copied!';
                 setTimeout(() => (copyLinkBtn.textContent = 'Copy Link'), 2000);
             } catch (err) {
                 showNotification('❌ Failed to copy link.');
+            } finally {
+                document.body.removeChild(textArea);
             }
         }
     });

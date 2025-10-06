@@ -47,7 +47,7 @@ async function login() {
             // Announce the admin's status upon connection
             socket.on('connect', () => {
                 socket.emit('userUpdate', {
-                    username: usernameInput.value, // Use the name from the login form
+                    username: usernameInput.value,
                     page: 'Admin Panel',
                     action: 'Monitoring'
                 });
@@ -79,6 +79,7 @@ async function loadAllAdminData() {
     await loadStats();
 }
 
+// UPDATED: Added dark mode classes
 function renderUserStats(counts) {
     const totalUsersStatDiv = document.getElementById('totalUsersStat');
     const senderUsersStatDiv = document.getElementById('senderUsersStat');
@@ -86,42 +87,43 @@ function renderUserStats(counts) {
 
     if(totalUsersStatDiv) {
         totalUsersStatDiv.innerHTML = `
-            <h3 class="text-sm font-medium text-neutral-500">Active Users</h3>
-            <p class="text-2xl font-semibold">${counts.total}</p>
+            <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Active Users</h3>
+            <p class="text-2xl font-semibold dark:text-neutral-200">${counts.total}</p>
         `;
     }
     if(senderUsersStatDiv) {
         senderUsersStatDiv.innerHTML = `
-            <h3 class="text-sm font-medium text-neutral-500">Senders</h3>
-            <p class="text-2xl font-semibold">${counts.senders}</p>
+            <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Senders</h3>
+            <p class="text-2xl font-semibold dark:text-neutral-200">${counts.senders}</p>
         `;
     }
     if(receiverUsersStatDiv) {
         receiverUsersStatDiv.innerHTML = `
-            <h3 class="text-sm font-medium text-neutral-500">Receivers</h3>
-            <p class="text-2xl font-semibold">${counts.receivers}</p>
+            <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Receivers</h3>
+            <p class="text-2xl font-semibold dark:text-neutral-200">${counts.receivers}</p>
         `;
     }
 }
 
+// UPDATED: Added dark mode classes
 function renderActiveUsers(users) {
     const activeUsersTableDiv = document.getElementById('activeUsersTable');
     if (!activeUsersTableDiv) return;
 
     const tableRows = users.map(u => `
-        <tr class="border-b border-neutral-200 bg-white last:border-b-0">
-            <td class="px-4 py-3">${escapeHTML(u.username)}</td>
-            <td class="px-4 py-3">${escapeHTML(u.ip)}</td>
-            <td class="px-4 py-3">${escapeHTML(u.deviceName)}</td>
-            <td class="px-4 py-3">${escapeHTML(u.deviceType)}</td>
-            <td class="px-4 py-3">${escapeHTML(u.page)}</td>
-            <td class="px-4 py-3">${escapeHTML(u.action)}</td>
+        <tr class="border-b border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 last:border-b-0">
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.username)}</td>
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.ip)}</td>
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.deviceName)}</td>
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.deviceType)}</td>
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.page)}</td>
+            <td class="px-4 py-3 dark:text-neutral-300">${escapeHTML(u.action)}</td>
         </tr>
     `).join('');
 
     const fullHtml = `
         <table class="min-w-full text-sm text-left">
-            <thead class="bg-neutral-50 text-neutral-700">
+            <thead class="bg-neutral-50 text-neutral-700 dark:bg-neutral-700/50 dark:text-neutral-300">
                 <tr>
                     <th class="px-4 py-2 font-medium">Username</th>
                     <th class="px-4 py-2 font-medium">IP</th>
@@ -131,14 +133,14 @@ function renderActiveUsers(users) {
                     <th class="px-4 py-2 font-medium">Action</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-neutral-200">
-                ${users.length > 0 ? tableRows : `<tr><td colspan="6" class="text-center p-8 text-neutral-500">No active users.</td></tr>`}
+            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                ${users.length > 0 ? tableRows : `<tr><td colspan="6" class="text-center p-8 text-neutral-500 dark:text-neutral-400">No active users.</td></tr>`}
             </tbody>
         </table>`;
     activeUsersTableDiv.innerHTML = fullHtml;
 }
 
-// **UPDATED FUNCTION**
+// UPDATED: Added dark mode classes
 async function loadStats() {
     try {
         const res = await fetch('/admin/stats');
@@ -146,44 +148,35 @@ async function loadStats() {
         const statsSection = document.getElementById('statsSection');
         if (!statsSection) return;
 
-        // ---- FIX STARTS HERE ----
-
-        // 1. Remove any previously added file stat boxes to prevent duplication
         const oldFileStats = statsSection.querySelectorAll('.file-stat-box');
         oldFileStats.forEach(box => box.remove());
 
-        // 2. Create the HTML for the new file stat boxes
         const fileStatsHtml = `
-            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
-                <h3 class="text-sm font-medium text-neutral-500">Total Upload Size</h3>
-                <p class="text-2xl font-semibold">${(stats.uploads.totalUploadSize / (1024*1024)).toFixed(2)} MB</p>
+            <div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Total Upload Size</h3>
+                <p class="text-2xl font-semibold dark:text-neutral-200">${(stats.uploads.totalUploadSize / (1024*1024)).toFixed(2)} MB</p>
             </div>
-            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
-                <h3 class="text-sm font-medium text-neutral-500">Total Files Uploaded</h3>
-                <p class="text-2xl font-semibold">${stats.uploads.totalFilesUploaded}</p>
+            <div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Total Files Uploaded</h3>
+                <p class="text-2xl font-semibold dark:text-neutral-200">${stats.uploads.totalFilesUploaded}</p>
             </div>
-            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
-                <h3 class="text-sm font-medium text-neutral-500">Total Download Size</h3>
-                <p class="text-2xl font-semibold">${(stats.downloads.totalDownloadSize / (1024*1024)).toFixed(2)} MB</p>
+            <div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Total Download Size</h3>
+                <p class="text-2xl font-semibold dark:text-neutral-200">${(stats.downloads.totalDownloadSize / (1024*1024)).toFixed(2)} MB</p>
             </div>
-            <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm file-stat-box">
-                <h3 class="text-sm font-medium text-neutral-500">Total Files Downloaded</h3>
-                <p class="text-2xl font-semibold">${stats.downloads.totalFilesDownloaded}</p>
+            <div class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm file-stat-box">
+                <h3 class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Total Files Downloaded</h3>
+                <p class="text-2xl font-semibold dark:text-neutral-200">${stats.downloads.totalFilesDownloaded}</p>
             </div>
         `;
-
-        // 3. Append the new boxes directly into the grid container
         statsSection.insertAdjacentHTML('beforeend', fileStatsHtml);
-
-        // ---- FIX ENDS HERE ----
         
     } catch (error) {
         console.error('Failed to load stats:', error);
     }
 }
 
-
-// Loads and displays the active sessions table
+// UPDATED: Added dark mode classes
 async function loadSessions() {
     const searchInput = document.getElementById('searchInput');
     const query = searchInput.value;
@@ -202,18 +195,18 @@ async function loadSessions() {
         const sessionTableDiv = document.getElementById('sessionTable');
 
         const tableRows = sessions.map(s => `
-            <tr class="border-b border-neutral-200 bg-white last:border-b-0">
-                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs">${escapeHTML(s.key)}</td>
-                <td class="whitespace-nowrap px-4 py-3">${escapeHTML(s.senderName)}</td>
-                <td class="px-4 py-3">
+            <tr class="border-b border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 last:border-b-0">
+                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs dark:text-neutral-300">${escapeHTML(s.key)}</td>
+                <td class="whitespace-nowrap px-4 py-3 dark:text-neutral-300">${escapeHTML(s.senderName)}</td>
+                <td class="px-4 py-3 dark:text-neutral-300">
                     <ul class="list-decimal list-inside text-xs">
                         ${(s.files || s.fileDetails || []).map(f => `<li>${escapeHTML(f.originalName)} (${((f.size || 0) / 1024).toFixed(1)} KB)</li>`).join('')}
                     </ul>
                 </td>
-                <td class="px-4 py-3">${(s.receiversWaiting && s.receiversWaiting.length > 0) ? escapeHTML(s.receiversWaiting.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
-                <td class="px-4 py-3">${(s.approvedReceivers && s.approvedReceivers.length > 0) ? escapeHTML(s.approvedReceivers.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
-                <td class="whitespace-nowrap px-4 py-3">${(((s.files || s.fileDetails || []).reduce((sum, f) => sum + (f.size || 0), 0)) / 1024).toFixed(1)} KB</td>
-                <td class="whitespace-nowrap px-4 py-3">${new Date(s.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                <td class="px-4 py-3 dark:text-neutral-300">${(s.receiversWaiting && s.receiversWaiting.length > 0) ? escapeHTML(s.receiversWaiting.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
+                <td class="px-4 py-3 dark:text-neutral-300">${(s.approvedReceivers && s.approvedReceivers.length > 0) ? escapeHTML(s.approvedReceivers.join(', ')) : '<span class="text-neutral-400">-</span>'}</td>
+                <td class="whitespace-nowrap px-4 py-3 dark:text-neutral-300">${(((s.files || s.fileDetails || []).reduce((sum, f) => sum + (f.size || 0), 0)) / 1024).toFixed(1)} KB</td>
+                <td class="whitespace-nowrap px-4 py-3 dark:text-neutral-300">${new Date(s.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
             </tr>
         `).join('');
 
@@ -223,9 +216,9 @@ async function loadSessions() {
                     Delete All Uploads
                 </button>
             </div>
-            <div class="border border-neutral-200 rounded-lg overflow-x-auto">
+            <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-x-auto">
                 <table class="min-w-full text-sm text-left">
-                    <thead class="bg-neutral-50 text-neutral-700">
+                    <thead class="bg-neutral-50 text-neutral-700 dark:bg-neutral-700/50 dark:text-neutral-300">
                         <tr>
                             <th class="px-4 py-2 font-medium">Key</th>
                             <th class="px-4 py-2 font-medium">Sender</th>
@@ -236,8 +229,8 @@ async function loadSessions() {
                             <th class="px-4 py-2 font-medium">Created</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200">
-                        ${sessions.length > 0 ? tableRows : `<tr><td colspan="7" class="text-center p-8 text-neutral-500">No active transfers found.</td></tr>`}
+                    <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+                        ${sessions.length > 0 ? tableRows : `<tr><td colspan="7" class="text-center p-8 text-neutral-500 dark:text-neutral-400">No active transfers found.</td></tr>`}
                     </tbody>
                 </table>
             </div>
@@ -245,7 +238,7 @@ async function loadSessions() {
         sessionTableDiv.innerHTML = fullHtml;
     } catch (error) {
         console.error('Failed to load sessions:', error);
-        document.getElementById('sessionTable').innerHTML = '<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">Error loading session data. Please try refreshing the page.</div>';
+        document.getElementById('sessionTable').innerHTML = '<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:bg-red-900/50 dark:border-red-700 dark:text-red-300">Error loading session data. Please try refreshing the page.</div>';
     }
 }
 
@@ -279,13 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(searchInput){
         let searchTimeout;
         searchInput.addEventListener('input', () => {
-            // Debounce search to avoid too many requests
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(loadSessions, 500);
         });
     }
 
-    // Attach a general click listener to the whole document for dynamic buttons
     document.addEventListener('click', (event) => {
         if (event.target && event.target.id === 'deleteAllBtn') {
             deleteAllUploads();
