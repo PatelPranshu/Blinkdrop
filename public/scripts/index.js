@@ -46,6 +46,15 @@ socket.on('connect', () => {
 document.addEventListener("DOMContentLoaded", () => {
     // This function runs once the entire HTML page is loaded.
 
+    const nameInput = document.getElementById('userName');
+    const storedName = localStorage.getItem('userName');
+
+    if (nameInput && storedName) {
+        nameInput.value = storedName;
+    }
+    // --- End of new code ---
+
+
     // 1. Clear any previous session key.
     sessionStorage.removeItem('activeTransferKey');
 

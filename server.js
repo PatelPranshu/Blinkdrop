@@ -83,7 +83,7 @@ const server = http.createServer(app);
 const io = new Server(server); // Socket.IO is initialized here
 app.set('trust proxy', 1); // <-- FIX #1: Trust the first proxy (like Render's)
 const PORT = process.env.PORT || 3000;
-console.log("APK URL from .env:", process.env.GOOGLE_DRIVE_APK_URL); 
+// console.log("APK URL from .env:", process.env.GOOGLE_DRIVE_APK_URL); 
 // --- Middleware ---
 app.use(express.static("public", { extensions: ["html"] }));
 app.use(express.json());
