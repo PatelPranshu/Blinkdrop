@@ -61,27 +61,27 @@ async function encryptFile(filePath, secretKey) {
     return encryptedFilePath;
 }
 
-// --- Controller Functions ---
+// // --- Controller Functions ---
 
-exports.getApkUrl = async (req, res) => {
-    try {
-        // Fetch the latest release data from your GitHub repository
-        const response = await axios.get('https://api.github.com/repos/PatelPranshu/Blinkdrop-app/releases/latest');
+// exports.getApkUrl = async (req, res) => {
+//     try {
+//         // Fetch the latest release data from your GitHub repository
+//         const response = await axios.get('https://api.github.com/repos/PatelPranshu/Blinkdrop-app/releases/latest');
         
-        // Find the asset that is the .apk file
-        const apkAsset = response.data.assets.find(asset => asset.name.endsWith('.apk'));
+//         // Find the asset that is the .apk file
+//         const apkAsset = response.data.assets.find(asset => asset.name.endsWith('.apk'));
 
-        if (apkAsset) {
-            // Send the direct download URL for that asset to the frontend
-            res.json({ url: apkAsset.browser_download_url });
-        } else {
-            throw new Error('No APK file found in the latest release.');
-        }
-    } catch (error) {
-        console.error('Error fetching latest release from GitHub:', error.message);
-        res.status(500).json({ error: 'Could not retrieve the download link.' });
-    }
-};
+//         if (apkAsset) {
+//             // Send the direct download URL for that asset to the frontend
+//             res.json({ url: apkAsset.browser_download_url });
+//         } else {
+//             throw new Error('No APK file found in the latest release.');
+//         }
+//     } catch (error) {
+//         console.error('Error fetching latest release from GitHub:', error.message);
+//         res.status(500).json({ error: 'Could not retrieve the download link.' });
+//     }
+// };
 
 exports.uploadFiles = async (req, res) => {
     try {
