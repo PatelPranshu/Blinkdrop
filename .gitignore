@@ -16,8 +16,8 @@ Thumbs.db
 # Temporary folders (relative to root)
 /uploads/
 
-# Compiled CSS (frontend)
-/frontend/style.css
+# # Compiled CSS (frontend)
+# /frontend/style.css
 
 # VS Code settings
 .vscode/
