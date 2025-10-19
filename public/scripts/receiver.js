@@ -48,13 +48,7 @@ async function checkKey(socket) {
     
     localStorage.setItem('userName', receiverName);
 
-    // Update socket with the user's action now that we have the key
-    socket.emit('userUpdate', {
-        username: receiverName,
-        page: 'Receiver',
-        action: `Receiving files with key ${key}`
-    });
-
+    
     activeKey = key;
     activeReceiver = receiverName;
     await fetchAndRenderFileInfo();

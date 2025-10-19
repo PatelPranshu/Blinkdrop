@@ -38,12 +38,6 @@ async function showFiles(socket) {
     localStorage.setItem('userName', receiverName);
     activeReceiver = receiverName;
 
-    // Update socket with the user's action now that we have the name and key
-    socket.emit('userUpdate', {
-        username: receiverName,
-        page: 'Receiver Link',
-        action: `Viewing files with key ${activeKey}`
-    });
 
     // Hide the name entry form and show the file list section
     document.getElementById('nameSection').style.display = 'none';

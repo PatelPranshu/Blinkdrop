@@ -4,3 +4,4 @@ if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && w
 } else {
     document.documentElement.classList.remove('dark');
 }
+
