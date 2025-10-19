@@ -32,9 +32,7 @@ async function uploadToDrive(filePath, originalName, parentFolderId, oAuth2Clien
 }
 
 
-// --- Encryption/Decryption Helper Functions ---
-// --- Encryption/Decryption Helper Functions ---
-const algorithm = 'aes-256-cbc';
+// --- Encryptio// --- Encryption/Decryption Helpeconst algorithm = 'aes-256-cbc';
 const salt = Buffer.from(process.env.ENCRYPTION_SALT, 'hex');
 
 function getKey(secretKey) {
@@ -274,10 +272,14 @@ exports.deleteAllUploads = async (req, res) => {
                 console.error(`❌ Failed to delete folder ${transfer.key}:`, err.message);
             }
         }
-        await Transfer.deleteMany({});
+
+        const deletionResult = await Transfer.deleteMany({}); // Delete all documents in the Transfer collection
+        console.log(`🔥 ${deletionResult.deletedCount} transfer records deleted from MongoDB.`);
+
         console.log("🔥 All transfer records deleted from MongoDB.");
         res.json({ success: true });
     } catch (err) {
+        console.error("❌ Error during deleteAllUploads:", err); 
         res.status(500).json({ error: "Failed to delete uploads" });
     }
 };

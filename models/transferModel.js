@@ -11,7 +11,7 @@ const transferSchema = new mongoose.Schema({
     }],
     approvedReceivers: [String],
     pendingReceivers: [String],
-    createdAt: { type: Date, default: Date.now, expires: '24h' }, // Automatically delete doc after 24 hours
+    createdAt: { type: Date, default: Date.now},
     isPublic: Boolean,
     driveFolderId: String
 });
