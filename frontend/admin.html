@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Blinkdrop</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.socket.io 'unsafe-inline';">
+    <link href="/style.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <script>
+        // Anti-FOUC script
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+
+<body class="bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200 antialiased selection:bg-neutral-900 selection:text-white flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-700">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <div class="h-16 flex items-center justify-between">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white dark:bg-neutral-800 dark:border-neutral-700 flex items-center justify-center shadow-sm">
+                        <img src="/favicon.png" alt="Blinkdrop logo" class="h-5 w-5">
+                    </div>
+                    <span class="text-lg font-semibold tracking-tight">Blinkdrop</span>
+                </a>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium dark:text-neutral-300">Admin Panel</span>
+                    <button id="theme-toggle" type="button" class="text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-200 dark:focus:ring-neutral-700 rounded-lg text-sm p-2.5">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative flex-grow py-10">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+
+            <div id="loginForm">
+                <div class="mx-auto max-w-sm">
+                    <div class="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-6 shadow-sm">
+                        <h2 class="text-center text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Admin Login</h2>
+                        <div class="mt-6 space-y-4">
+                            <input type="text" id="adminUser" placeholder="Username" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
+                            <input type="password" id="adminPass" placeholder="Password" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
+                            <button id="loginBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                                Login
+                            </button>
+                            <p id="loginError" class="text-center text-sm text-red-600 dark:text-red-400 min-h-[1.25rem]"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboard" class="hidden">
+                <section id="statsSection" class="mb-8 grid md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    <div id="totalUsersStat" class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm"></div>
+                    <div id="senderUsersStat" class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm"></div>
+                    <div id="receiverUsersStat" class="rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 shadow-sm"></div>
+                </section>
+                
+                <section class="mb-8">
+                    <h2 class="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 mb-4">Active Users</h2>
+                    <div id="activeUsersTable" class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-x-auto"></div>
+                </section>
+
+                <div class="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-4 sm:p-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">File Transfers</h2>
+                        <input type="text" id="searchInput" placeholder="Search by key, name, file..." class="w-full max-w-xs rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
+                    </div>
+                    <div id="sessionTable"></div>
+                </div>
+                <section class="mt-8">
+                    <h2 class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 mb-4">
+                        User Activity Log
+                    </h2>
+                    <div id="activityLog"
+                        class="h-64 overflow-y-auto border border-neutral-300 dark:border-neutral-700 rounded-lg bg-neutral-100 dark:bg-neutral-800 p-3 font-mono text-xs text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+                        <div class="log-entry log-info">Waiting for server activity...</div>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+    <div id="notification-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+    
+    <footer class="border-t border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 mt-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex items-center justify-center">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">Blinkdrop Admin Panel</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/scripts/admin.js"></script>
+    <script src="/scripts/theme.js"></script>
+    <script src="/scripts/common.js"></script>
+</body>
+</html>

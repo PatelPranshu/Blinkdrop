@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class=""> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.socket.io https://cdn.tailwindcss.com 'sha256-G2CvDOSdZeixAGRXwWiD1g5ToAVLsVfFfDsDqC7plk0=' 'sha256-VD1Hgx5t41rMsFk2/dCXRNIRedIx0DHZ7Mt8G1VbT8Q=';">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>Blinkdrop – Fast &amp; Secure File Sharing</title>
+
+    <meta name="description" content="Instantly share files of any size with Blinkdrop. Secure, private, and free file transfers without needing to sign up. Works on any device.">
+    
+    <meta name="keywords" content="file sharing, secure file transfer, send large files, free file sharing, instant file sharing, p2p file sharing, Blinkdrop">
+    
+    <link rel="canonical" href="https://Blinkdrop.app/">
+
+    <meta property="og:title" content="Blinkdrop – Fast & Secure File Sharing">
+    <meta property="og:description" content="Send and receive files of any size instantly without signup.">
+    <meta property="og:image" content="https://Blinkdrop.app/favicon.png">
+    <meta property="og:url" content="https://Blinkdrop.app">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+
+    <meta name="theme-color" content="#171717"> <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link href="style.css" rel="stylesheet">
+    <script src="/scripts/headerCom.js"></script>
+</head>
+
+<body class="bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200 antialiased selection:bg-neutral-900 selection:text-white dark:selection:bg-neutral-100 dark:selection:text-black">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-700">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="relative flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
+                    <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
+                        <img src="/favicon.png" alt="Blinkdrop logo" class="h-5 w-5">
+                    </div>
+                    <span class="text-lg font-semibold tracking-tight">Blinkdrop</span>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex md:items-center md:justify-center md:gap-6 text-sm font-medium">
+                <a href="#features" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Features</a>
+                <a href="/blog/blog" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Blog</a>
+                <a href="/about" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">About</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <div class="hidden md:flex items-center gap-2">
+                    <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
+                                    Scan QR
+                    </a>
+                </div>
+
+                <button id="theme-toggle" type="button" class="flex-shrink-0 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-200 dark:focus:ring-neutral-700 rounded-lg text-sm p-2.5">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+
+                <button id="mobile-menu-button" type="button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neutral-500">
+                    <span class="sr-only">Open main menu</span>
+                    <svg id="menu-closed-icon" class="h-6 w-6 block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    <svg id="menu-open-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden absolute top-16 inset-x-0 bg-white/95 dark:bg-neutral-900/95 border-b border-neutral-200 dark:border-neutral-800 backdrop-blur-sm">
+            <div class="px-4 pt-4 pb-6 space-y-4">
+                <a href="#features" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Features</a>
+                <a href="/blog/blog" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Blog</a>
+                <a href="/about" class="block text-base font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">About</a>
+                <div class="border-t border-neutral-200 dark:border-neutral-800 pt-4 flex items-center gap-2">
+                     <a href="/receiver-scan" class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-3 py-2 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-200 dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
+                                    Scan QR
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <main class="relative">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <section class="relative isolate overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 shadow-sm mt-8">
+                <div class="p-6 sm:p-10 max-w-2xl mx-auto">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-700/50 px-3 py-1 text-xs text-neutral-600 dark:text-neutral-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-700 dark:stroke-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"></path></svg>
+                        No signup • Works on any device
+                    </div>
+                    <h1 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                        Fast, secure file sharing without friction
+                    </h1>
+                    <p class="mt-3 text-base text-neutral-600 dark:text-neutral-400">
+                        Share instantly using a one-time key. Keep files in your control with a seamless send/receive flow.
+                    </p>
+
+                    <div class="mt-6 rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900 p-4 sm:p-6 text-center">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
+                            <div class="md:col-span-3">
+                                <input id="userName" type="text" maxlength="30" autocomplete="name" placeholder="Enter your name" class="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-500">
+                            </div>
+                            <div>
+                                <button id="senderBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 px-4 py-2.5 text-sm font-medium shadow-sm active:scale-[0.99] transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-white dark:stroke-neutral-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    Send files
+                                </button>
+                            </div>
+                            <div>
+                                <button id="receiverBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-4 py-2.5 text-sm font-medium active:scale-[0.99] transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-900 dark:stroke-neutral-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Receive files
+                                </button>
+                            </div>
+                            <div>
+                                <button id="scanBtn" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700 px-4 py-2.5 text-sm font-medium active:scale-[0.99] transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-neutral-900 dark:stroke-neutral-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3z"></path><path d="M17 13h4v4M13 17h4M17 21v-4"></path></svg>
+                                    Scan QR
+                                </button>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-[13px] text-neutral-500 dark:text-neutral-400">
+                            A secure key is generated during sending. Share it privately with your recipient.
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- <section class="mx-auto max-w-5xl mt-6">
+                <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-3 sm:p-4 shadow-sm">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">Sponsored</p>
+                    <div class="mt-2 flex justify-center">
+                        <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-6476825082501261" data-ad-slot="5504370163"></ins>
+                    </div>
+                </div>
+            </section> -->
+
+            <section class="mx-auto max-w-2xl mt-6" id="features">
+                <a href="/download-apk" class="group block w-full text-left p-4 rounded-xl border border-green-300 bg-green-50 shadow-sm hover:border-green-400 hover:bg-green-100 transition dark:border-green-900 dark:bg-green-900/20 dark:hover:border-green-800 dark:hover:bg-green-900/30">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-white border border-green-200 dark:bg-green-900/50 dark:border-green-800">
+                            <svg class="h-6 w-6 text-green-700 dark:text-green-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m14 2-3 5h4l-3 5"/><path d="M9 12H5"/><path d="M9 16H5"/><path d="M9 20H5"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-green-900 dark:text-green-300">Download for Android</h3>
+                            <p class="text-sm text-green-700 dark:text-green-400">Get the official Blinkdrop APK for a better mobile experience.</p>
+                        </div>
+                    </div>
+                </a>
+            </section>
+
+
+        <section class="mx-auto max-w-4xl mt-10" >
+            <div class="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-green-50 text-green-700 border border-green-200 dark:bg-neutral-700 dark:text-green-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                    </div>
+                <div>
+                    <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">End-to-End Encryption</h3>
+                    <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                        Your files are encrypted in your browser using the 6-digit key before being uploaded. They can only be decrypted by a recipient who has the correct key.
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+            <section class="mx-auto max-w-7xl mt-10">
+                <div class="grid md:grid-cols-3 gap-4 text-left">
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-neutral-900 dark:stroke-neutral-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><path d="M16 16h-8"></path></svg>
+                            <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Send files</h3>
+                        </div>
+                        <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                            Select files to share. A unique, one-time key is generated for your transfer.
+                        </p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-neutral-900 dark:stroke-neutral-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-2 2l-5 5v3h3l5-5M7.5 7.5a4 4 0 1 0 0 5.657 4 4 0 0 0 0-5.657z"></path></svg>
+                            <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Share the key</h3>
+                        </div>
+                        <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                            Share the key with your recipient through your preferred private channel.
+                        </p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-neutral-900 dark:stroke-neutral-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Receive files</h3>
+                        </div>
+                        <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                            Enter your name and key to securely download your files on any device.
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-6 text-sm text-neutral-500 dark:text-neutral-400 text-center">
+                    Blinkdrop uses the official Google Drive API to manage files. Your files are stored in Google Drive and made accessible only to recipients with the key.
+                </p>
+            </section>
+
+            <section class="mx-auto max-w-7xl mt-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Why Choose Blinkdrop?</h2>
+                    <p class="mt-2 text-base text-neutral-600 dark:text-neutral-400">Everything you need for simple and secure file sharing.</p>
+                </div>
+                <div class="mt-8 grid md:grid-cols-2 gap-4 text-left">
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Uncompromising Security</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                            With client-side, end-to-end encryption, your files are secured before they even leave your device. Only someone with your unique 6-digit key can decrypt them.
+                        </p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Frictionless Experience</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                            No sign-ups, no accounts, no hassle. Just enter your name, select your files, and share. It's the quickest way to send files to anyone, on any device.
+                        </p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Built for Large Files</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                            Don't let email attachment limits slow you down. Blinkdrop is designed to handle large files with ease, making it perfect for videos, design projects, and more.
+                        </p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-200">Sender-Controlled Access</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                            You're in charge. Choose to allow downloads for anyone with the key, or approve each recipient manually for an extra layer of control over who accesses your files.
+                        </p>
+                    </div>
+                </div>
+            </section>
+            <section class="mx-auto max-w-4xl mt-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Frequently Asked Questions</h2>
+                </div>
+                <div class="mt-8 space-y-4">
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">Is Blinkdrop free to use?</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">Yes, Blinkdrop is completely free for sharing files. We are supported by the ads on our content pages, which allows us to keep the service running without charging users.</p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">How long are my files stored?</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">To protect your privacy and save space, all uploaded files and their associated transfer keys are automatically and permanently deleted from our servers after 24 hours.</p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">What is the maximum file size?</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">You can upload files up to 10GB and a maximum of 100 files per transfer. This makes it easy to share high-resolution photos, videos, and large documents without any issues.</p>
+                    </div>
+                    <div class="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 p-5 shadow-sm">
+                        <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">How does Blinkdrop keep my files secure?</h3>
+                        <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">We use end-to-end encryption. Your files are encrypted on your device using your unique key before being uploaded. This means only you and the recipient with the key can access the files. We, at Blinkdrop, cannot view your files.</p>
+                    </div>
+                </div>
+            </section>
+            </div>
+    </main>
+    <div id="notification-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+
+    <footer class="mt-10 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <div class="py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
+        
+        <div class="md:col-span-4 lg:col-span-5">
+          <a href="/" class="group inline-flex items-center gap-2.5 text-neutral-900 dark:text-white">
+            <div class="h-8 w-8 rounded-md border border-neutral-200 bg-white flex items-center justify-center shadow-sm dark:bg-neutral-800 dark:border-neutral-700">
+              <img src="/favicon.png" alt="Blinkdrop logo" class="h-5 w-5">
+            </div>
+            <span class="text-xl font-semibold tracking-tight">Blinkdrop</span>
+          </a>
+          <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+            Simple, secure, and instant file sharing. Built with privacy at its core.
+          </p>
+        </div>
+
+        <div class="md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          
+          <div class="text-sm">
+            <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">Resources</h3>
+            <ul class="mt-4 space-y-3">
+              <li><a href="/blog/blog" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Blog</a></li>
+              <li><a href="mailto:pranshuvramani@gmail.com" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Support</a></li>
+            </ul>
+          </div>
+
+          <div class="text-sm">
+            <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">Company</h3>
+            <ul class="mt-4 space-y-3">
+              <li><a href="/about" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">About Us</a></li>
+              <li><a href="/privacy-policy" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Privacy</a></li>
+              <li><a href="/terms-conditions" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">Terms</a></li>
+            </ul>
+          </div>
+
+          <div class="text-sm">
+            <h3 class="font-semibold text-neutral-900 dark:text-neutral-200">Social</h3>
+            <ul class="mt-4 space-y-3">
+              <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.155a20.45 20.45 0 00-4.63-1.418c-.83-.243-1.693-.42-2.57-.532C12.28.987 11.45.922 10.6.922c-3.23 0-6.16.81-8.45 2.25a.74.74 0 00-.33.645v11.11c0 .41.24.765.615.915a11.33 11.33 0 003.585 1.02c.03.015.045.03.075.045l.18.09c.435.21.885.39 1.35.54a10.87 10.87 0 004.83 0c.465-.15.915-.33 1.35-.54l.18-.09c.03-.015.045-.03.075-.045a11.33 11.33 0 003.585-1.02c.375-.15.615-.505.615-.915V4.8a.74.74 0 00-.345-.645zM8.45 14.545c-.825 0-1.5-.72-1.5-1.605s.675-1.605 1.5-1.605c.84 0 1.515.72 1.5 1.605.015.885-.66 1.605-1.5 1.605zm7.095 0c-.825 0-1.5-.72-1.5-1.605s.675-1.605 1.5-1.605c.84 0 1.515.72 1.5 1.605s-.66 1.605-1.5 1.605z"/></svg>
+                  Discord
+                </a>
+              </li>
+              <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  LinkedIn
+                </a>
+              </li>
+              <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  YouTube
+                </a>
+              </li>
+              <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  Twitter/X
+                </a>
+              </li>
+               <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.012 3.584-.07 4.85c-.148 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.012-3.584.07-4.85c.148-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.947s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.44-.645 1.44-1.44-.645-1.44-1.44-1.44z"/></svg>
+                  Instagram
+                </a>
+              </li>
+              <li>
+                <a href="#" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.111 15.52c-.445.445-1.043.668-1.642.668-.6 0-1.197-.223-1.642-.668-.889-.889-.889-2.395 0-3.284.889-.889 2.395-.889 3.284 0 .889.889.889 2.395 0 3.284zm6.222 0c-.445.445-1.043.668-1.642.668-.6 0-1.197-.223-1.642-.668-.889-.889-.889-2.395 0-3.284.889-.889 2.395-.889 3.284 0 .889.889.889 2.395 0 3.284zm-.129-6.942c-1.009-.434-2.223-.659-3.482-.659-1.259 0-2.473.225-3.482.659-.292.126-.45.429-.324.721.126.292.429.45.721.324 2.656-.856 5.619-.856 8.274 0 .101.043.21.064.319.064.201 0 .393-.11.474-.306.126-.292-.032-.595-.324-.721zm-2.132 4.164c-1.396 1.396-3.834 1.396-5.229 0-1.396-1.396-1.396-3.834 0-5.229.698-.698 1.614-1.047 2.615-1.047s1.917.349 2.615 1.047c1.396 1.396 1.396 3.834 0 5.229z"/></svg>
+                  Reddit
+                </a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="py-6 border-t border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-xs text-neutral-500 dark:text-neutral-400">
+            © <span id="year"></span> Blinkdrop — All rights reserved.
+        </p>
+      </div>
+    </div>
+</footer>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/scripts/index.js"></script>
+    <script src="/scripts/theme.js"></script>
+    <script src="/scripts/common.js"></script>
+</body>
+</html> 

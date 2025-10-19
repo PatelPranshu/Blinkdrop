@@ -1,5 +1,5 @@
-# Node modules
-node_modules/
+# Node modules (backend)
+/backend/node_modules/
 
 # Environment variables
 .env
@@ -13,17 +13,18 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Temporary folders
-temp/
-uploads/
-public/uploads/
-/public/style.css
+# Temporary folders (relative to root)
+/uploads/
+
+# Compiled CSS (frontend)
+/frontend/style.css
 
 # VS Code settings
 .vscode/
 
 # Dependency directories
 yarn.lock
+/backend/package-lock.json # If you keep lock file in backend
 
 # Google credentials
 oauth-client.json
