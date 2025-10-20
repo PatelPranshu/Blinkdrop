@@ -4,7 +4,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cors = require('cors');
-
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 const { setupSession } = require('./middleware/session');
 const setupSecurityHeaders = require('./middleware/securityHeaders');
@@ -30,8 +30,17 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ["html"] })); // Serve frontend
 app.use(attachDriveClient); // Make Drive client available in requests
 
+
+// --- 🛡️ RATE LIMITING ---
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: process.env.RATE_LIMIT, // Limit each IP to 100 requests per `windowMs`
+    message: 'Too many requests from this IP, please try again after some time',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 // --- Routes ---
-app.use('/', mainRouter); // Use the main router
+app.use('/', apiLimiter, mainRouter); // Use the main router
 
 // --- Socket.IO ---
 initSocketIO(server); // Initialize and attach Socket.IO

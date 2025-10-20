@@ -80,8 +80,8 @@ async function generateUniqueKey() {
               approved: isApproved,
               isPublic: transfer.isPublic, // Include public status
               // For admin or internal use, you might include pending/approved lists
-              // pendingReceivers: transfer.pendingReceivers,
-              // approvedReceivers: transfer.approvedReceivers
+              pendingReceivers: transfer.pendingReceivers,
+              approvedReceivers: transfer.approvedReceivers
           }
       };
   }

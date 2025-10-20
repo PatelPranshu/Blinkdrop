@@ -75,17 +75,22 @@ const setupUserTracking = (io) => { // Accept io instance
 
         // --- Initialize or find user session entry ---
         if (!activeUsers[sessionId]) {
-            activeUsers[sessionId] = {
-                sessionId: sessionId,
-                ip,
-                deviceName: `${agent.os.toString()} on ${agent.toAgent()}`,
-                deviceType: agent.device.toString(),
-                username: session.username || 'Anonymous', // Use session username if available
-                connectedAt: now,
-                connections: {} // Store individual socket connections
-            };
-            // Log user connection
-            log(LOG_TYPES.USER_CONNECT, `New session connected: ${sessionId.substring(0, 6)}...`, { ip: ip, sessionId: sessionId });
+            const newUsername = session.username || 'Anonymous'; // Get the username first
+            activeUsers[sessionId] = {
+                sessionId: sessionId,
+                ip,
+                deviceName: `${agent.os.toString()} on ${agent.toAgent()}`,
+                deviceType: agent.device.toString(),
+                username: newUsername, // Use the variable here
+                connectedAt: now,
+                connections: {} // Store individual socket connections
+            };
+            // Log user connection
+            log(LOG_TYPES.USER_CONNECT, `New session connected: ${sessionId.substring(0, 6)}...`, { 
+                ip: ip, 
+                sessionId: sessionId, 
+                username: newUsername // <-- Add the username to the data object
+            });
         } else {
              // Update IP/device info if it changed
              activeUsers[sessionId].ip = ip;
@@ -116,8 +121,8 @@ const setupUserTracking = (io) => { // Accept io instance
                 if (username && currentUserData.username !== username) {
                     currentUserData.username = username;
                     // Persist username in session if desired
-                    // socket.request.session.username = username;
-                    // socket.request.session.save(); // Requires async handling or callback
+                    socket.request.session.username = username;
+                    socket.request.session.save(); // Requires async handling or callback
                 }
 
                 // Update details for this specific socket connection
@@ -159,31 +164,23 @@ const setupUserTracking = (io) => { // Accept io instance
         // --- Event Listener: 'disconnect' ---
         socket.on('disconnect', (reason) => {
             if (activeUsers[sessionId]) {
-                 // Capture username *before* potentially deleting the session object
-                 const username = activeUsers[sessionId].username || 'Unknown'; // Use 'Unknown' as fallback
+                 // --- FIX: Capture username *before* deleting the session ---
+                 const username = activeUsers[sessionId].username || 'Unknown';
 
                 delete activeUsers[sessionId].connections[socketId]; // Remove this specific connection
 
-                // If this was the last connection for the session, remove the session entry
                 if (Object.keys(activeUsers[sessionId].connections).length === 0) {
-                     const disconnectedUser = activeUsers[sessionId]; // Get user info before deleting (redundant now, username captured above)
-                    delete activeUsers[sessionId]; // Now delete the session object
-
-                    // Log user disconnection with captured username
                     log(LOG_TYPES.USER_DISCONNECT, `Session disconnected: ${sessionId.substring(0, 6)}...`, {
-                         reason: reason,
-                         username: username, // Use the captured username
-                         sessionId: sessionId
-                     });
+                        reason: reason,
+                        username: username, // Pass the captured username
+                        sessionId: sessionId
+                    });
+                    delete activeUsers[sessionId]; // Now delete the session
                 }
-                // If other connections exist for the session, you might log differently or not at all.
-                // Current logic only logs the final session end.
-
             } else {
-                // Log warning if disconnect happens for an already removed session
-                log(LOG_TYPES.WARN, `Disconnect for unknown/removed session or socket`, { sessionId: sessionId, socketId: socketId });
+                 log(LOG_TYPES.WARN, `Disconnect for unknown session/socket`, { sessionId: sessionId, socketId: socketId });
             }
-            emitActiveUsers(io); // Emit updated list after disconnect
+            emitActiveUsers(io);
         });
 
         // Initial emit for the newly connected client and others
